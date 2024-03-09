@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:13
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: thesisdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+
+  python_app:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - db
+    # Optional: Implement a wait-for-it strategy here to ensure db is ready.
+
+  bash_script:
+    build:
+      context: .
+      dockerfile: Dockerfile.bash
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - python_app
+    # This service starts after python_app, assuming python_app is ready to process files.

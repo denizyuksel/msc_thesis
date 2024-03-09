@@ -1,0 +1,18 @@
+# Use an official Python runtime as a parent image, specifying Python 3.12
+FROM python:3.12-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Install system dependencies required for psycopg2
+RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/lists/*
+
+# Copy the Python script and requirements.txt into the container
+COPY watchdog_v2.py .
+COPY requirements.txt .
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Command to run the Python script
+CMD ["python", "./watchdog_v2.py"]
