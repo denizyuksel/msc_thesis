@@ -20,7 +20,8 @@ services:
       - ./data:/app/data
     depends_on:
       - db
-    # Optional: Implement a wait-for-it strategy here to ensure db is ready.
+    environment:
+      DB_HOST: db  # Use the service name as the host within docker-compose
 
   bash_script:
     build:

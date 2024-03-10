@@ -13,13 +13,12 @@ import logging
 # Setup basic logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Either use localhost_name or docker_host_name depending on which env you execute
-localhost_name = 'localhost'
+# Use environment variable to set the host. Fallback to 'localhost' if not set.
+db_host = os.getenv('DB_HOST', 'localhost')
 docker_host_name = 'db'
 
-# Define database parameters
 db_params = {
-    'host': localhost_name,
+    'host': docker_host_name,
     'database': 'thesisdb',
     'user': 'postgres',
     'password': 'admin',
