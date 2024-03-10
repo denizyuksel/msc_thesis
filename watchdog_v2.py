@@ -13,9 +13,13 @@ import logging
 # Setup basic logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Either use localhost_name or docker_host_name depending on which env you execute
+localhost_name = 'localhost'
+docker_host_name = 'db'
+
 # Define database parameters
 db_params = {
-    'host': 'db',  # Use the service name defined in docker-compose.yml
+    'host': localhost_name,
     'database': 'thesisdb',
     'user': 'postgres',
     'password': 'admin',
@@ -70,15 +74,12 @@ def create_transactions_table(engine):
                 basefeepergas NUMERIC(38),
                 dropreason VARCHAR(255),
                 rejectionreason VARCHAR(255),
-                stuck BOOLEAN,  -- Ensure this matches your needs; initially created as DOUBLE PRECISION?
+                stuck BOOLEAN,
                 gasused INT,
                 detect_date VARCHAR(100)
             );
         """))
-        # After table creation, modify the 'stuck' column type if necessary, and add indices
-        connection.execute(text("""
-            ALTER TABLE transactions ALTER COLUMN stuck TYPE BOOLEAN USING CASE WHEN stuck = 0 THEN FALSE ELSE TRUE END;
-        """))
+            
         connection.execute(text("CREATE INDEX IF NOT EXISTS idx_transactions_hash ON transactions(hash);"))
         connection.execute(text("CREATE INDEX IF NOT EXISTS idx_transactions_region ON transactions(region);"))
 
@@ -114,7 +115,23 @@ def directory_processing_worker(engine, directories_queue):
         process_and_load_data(engine, directory_path)
         directories_queue.task_done()
 
-def is_file_write_complete(file_path, check_interval=10, retries=3):
+# def is_file_write_complete(file_path, check_interval=10, retries=3):
+#     last_size = -1
+#     attempts = 0
+#     while attempts < retries:
+#         current_size = os.path.getsize(file_path)
+#         logging.info(f"Checking file stability: {file_path}, current size: {current_size}, attempt: {attempts + 1}")
+#         if current_size == last_size:
+#             logging.info("File download/write appears complete.")
+#             return True
+#         else:
+#             last_size = current_size
+#             attempts += 1
+#             time.sleep(check_interval)
+#     logging.info("File may still be writing or download incomplete.")
+#     return False
+
+def is_file_write_complete(file_path, retries=4):
     last_size = -1
     attempts = 0
     while attempts < retries:
@@ -125,8 +142,8 @@ def is_file_write_complete(file_path, check_interval=10, retries=3):
             return True
         else:
             last_size = current_size
+            time.sleep(10**attempts)  # 10^attempts milliseconds
             attempts += 1
-            time.sleep(check_interval)
     logging.info("File may still be writing or download incomplete.")
     return False
 
@@ -147,6 +164,8 @@ def process_and_load_data(engine, directory_path):
                 logging.info(f"Processing file: {file_path}")
                 try:
                     df = pd.read_csv(file_path, sep='\t', compression='gzip')
+                    # Convert double precision 'stuck' values to boolean:
+                    df['stuck'] = df['stuck'].map({1: True, 0: False, 'true': True, 'false': False, 'True': True, 'False': False}).fillna(False)
                     accumulator_df = pd.concat([accumulator_df, df], ignore_index=True)
                 except Exception as e:
                     logging.error(f"Error processing file {file_path}: {e}")
