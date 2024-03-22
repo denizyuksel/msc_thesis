@@ -2,3 +2,4 @@ data/*
 db_data/*
 thesis_env/*
 logs/*
+saved_logs/*

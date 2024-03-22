@@ -3,6 +3,7 @@ import re
 import time
 import pandas as pd
 from sqlalchemy import create_engine, text
+from sqlalchemy import Column, Table, MetaData, TIMESTAMP, VARCHAR, NUMERIC, INTEGER, BIGINT
 from sqlalchemy.exc import OperationalError
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -33,6 +34,8 @@ db_params = {
     'port': '5432'
 }
 
+table_name = 'transactions_small'
+
 # Create a SQLAlchemy engine
 engine = create_engine(f"postgresql://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}")
 
@@ -52,41 +55,26 @@ def wait_for_db(engine, max_retries=10, delay_between_retries=5):
     logging.error(f"Failed to connect to the database after {max_retries} attempts.")
     return False
 
-def create_transactions_table(engine):
-    with engine.connect() as connection:
-        connection.execute(text("""
-            CREATE TABLE IF NOT EXISTS transactions (
-                detecttime TIMESTAMP,
-                hash VARCHAR(256) NOT NULL PRIMARY KEY,
-                reorg VARCHAR(100),
-                replace VARCHAR(100),
-                curblocknumber NUMERIC(18),
-                blockspending INT,
-                timepending BIGINT,
-                nonce NUMERIC(38),
-                gas NUMERIC(38),
-                gasprice NUMERIC(38),
-                value NUMERIC(38),
-                toaddress VARCHAR(256),
-                fromaddress VARCHAR(256),
-                input VARCHAR(65535),
-                type INT,
-                maxpriorityfeepergas NUMERIC(38),
-                maxfeepergas NUMERIC(38),
-                basefeepergas NUMERIC(38),
-                dropreason VARCHAR(255),
-                rejectionreason VARCHAR(255),
-                stuck BOOLEAN,
-                gasused INT,
-                detect_date VARCHAR(100)
-            );
-        """))
+def create_transactions_small_table(engine, metadata):
+    """
+    Creates the 'transactions_small' table in the database using the provided engine and metadata.
+    """
+    # Define the 'transaction_small' table structure
+    transactions_small_table = Table(table_name, metadata,
+        Column('detecttime', TIMESTAMP),
+        Column('hash', VARCHAR(256), primary_key=True),
+        Column('curblocknumber', NUMERIC(18)),
+        Column('blockspending', INTEGER),
+        Column('timepending', BIGINT),
+        Column('gasprice', NUMERIC(38)),
+        Column('gasused', INTEGER),
+        Column('nonce', NUMERIC(38)),
+        Column('detect_date', VARCHAR(100), index=True)
+    )
+    # Create the table
+    metadata.create_all(engine)
+    logging.info("Table 'transactions_small' has been created/ensured in the database, with 'hash' as the primary key.")
 
-        # Since 'hash' is now a primary key, an explicit index creation for it is unnecessary.
-        # The PRIMARY KEY constraint automatically creates a unique index.
-        # However, if you have other columns you frequently query by, you can create indexes for those.
-
-        logging.info("Table 'transactions' has been created/ensured in the database, with 'hash' as the primary key.")
 # Queue for directories to be processed
 directories_queue = Queue()
 
@@ -160,7 +148,7 @@ class File:
             # Filter the DataFrame for the desired conditions
             self.data = self.data[(self.data['status'] == 'confirmed') & (self.data['region'] == 'us-east-1') & (self.data['network'] == 'main')]
             # Drop the 'status' and 'region' columns as they are no longer needed
-            self.data = self.data.drop(columns=['status', 'region', 'failurereason', 'network'])
+            self.data = self.data.drop(columns=['reorg', 'replace', 'gas', 'value', 'toaddress', 'fromaddress', 'input', 'type', 'maxpriorityfeepergas', 'maxfeepergas', 'basefeepergas', 'dropreason', 'rejectionreason', 'stuck', 'status', 'region', 'failurereason', 'network'])
             return True
         except Exception as e:
             logging.error(f"Error loading data from file {self.path}: {e}")
@@ -197,7 +185,7 @@ def process_and_load_data(engine, directory_path):
 
                     if len(accumulator_df) >= batch_size:
                         try:
-                            accumulator_df.to_sql(name='transactions', con=engine, if_exists='append', index=False)
+                            accumulator_df.to_sql(name=table_name, con=engine, if_exists='append', index=False)
                             accumulator_df = pd.DataFrame()
                         except Exception as e:
                             logging.error(f"Failed to write batch to database: {e}")
@@ -212,7 +200,7 @@ def process_and_load_data(engine, directory_path):
 
     if not accumulator_df.empty:
         try:
-            accumulator_df.to_sql(name='transactions', con=engine, if_exists='append', index=False)
+            accumulator_df.to_sql(name=table_name, con=engine, if_exists='append', index=False)
         except Exception as e:
             logging.error(f"Failed to write remaining data to database: {e}")
 
@@ -239,7 +227,8 @@ if __name__ == "__main__":
         logging.error("Could not connect to the database. Exiting...")
         exit(1)
         
-    create_transactions_table(engine)
+    metadata = MetaData()
+    create_transactions_small_table(engine, metadata)
     
     # Change directory_path to point to the "data" directory inside the current directory
     directory_path = os.path.join(os.getcwd(), "data")
