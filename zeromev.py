@@ -37,8 +37,8 @@ metadata = MetaData()
 table = Table(table_name, metadata,
     Column('block_number', NUMERIC(18), primary_key=True),
     
-    Column('total_user_swap_volume', NUMERIC(24,2)),
-    Column('total_extractor_profit', NUMERIC(24,2)),
+    Column('total_user_swap_volume', NUMERIC),
+    Column('total_extractor_profit', NUMERIC),
     
     Column('multiple_count', INTEGER),
     Column('aave_count', INTEGER),
@@ -51,19 +51,19 @@ table = Table(table_name, metadata,
     Column('zerox_count', INTEGER),
     Column('unknown_count', INTEGER),
     
-    Column('arb_extractor_profit', NUMERIC(24,2)),
-    Column('frontrun_extractor_profit', NUMERIC(24,2)),
-    Column('sandwich_extractor_profit', NUMERIC(24,2)),
-    Column('backrun_extractor_profit', NUMERIC(24,2)),
-    Column('liquid_extractor_profit', NUMERIC(24,2)),
-    Column('swap_extractor_profit', NUMERIC(24,2)),
+    Column('arb_extractor_profit', NUMERIC),
+    Column('frontrun_extractor_profit', NUMERIC),
+    Column('sandwich_extractor_profit', NUMERIC),
+    Column('backrun_extractor_profit', NUMERIC),
+    Column('liquid_extractor_profit', NUMERIC),
+    Column('swap_extractor_profit', NUMERIC),
     
-    Column('arb_user_swap_volume', NUMERIC(24,2)),
-    Column('frontrun_user_swap_volume', NUMERIC(24,2)),
-    Column('sandwich_user_swap_volume', NUMERIC(24,2)),
-    Column('backrun_user_swap_volume', NUMERIC(24,2)),
-    Column('liquid_user_swap_volume', NUMERIC(24,2)),
-    Column('swap_user_swap_volume', NUMERIC(24,2)),
+    Column('arb_user_swap_volume', NUMERIC),
+    Column('frontrun_user_swap_volume', NUMERIC),
+    Column('sandwich_user_swap_volume', NUMERIC),
+    Column('backrun_user_swap_volume', NUMERIC),
+    Column('liquid_user_swap_volume', NUMERIC),
+    Column('swap_user_swap_volume', NUMERIC),
     
     Column('arb_count', INTEGER),
     Column('frontrun_count', INTEGER),
@@ -170,7 +170,7 @@ def write_to_db(df, engine):
 
 def main():
     start_time = time.time()  # Start the clock
-    start_block_number = 11172686
+    start_block_number = 19220986
     end_block_number = 19499238
     blocks_per_request = 100
     total_blocks = end_block_number - start_block_number + 1
