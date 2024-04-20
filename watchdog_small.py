@@ -3,7 +3,7 @@ import re
 import time
 import pandas as pd
 from sqlalchemy import create_engine, text
-from sqlalchemy import Column, Table, MetaData, TIMESTAMP, VARCHAR, NUMERIC, INTEGER, BIGINT
+from sqlalchemy import Column, Table, MetaData, TIMESTAMP, VARCHAR, NUMERIC, INTEGER, BIGINT, Index
 from sqlalchemy.exc import OperationalError
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -34,7 +34,7 @@ db_params = {
     'port': '5432'
 }
 
-table_name = 'transactions_small'
+table_name = 'transactions'
 
 # Create a SQLAlchemy engine
 engine = create_engine(f"postgresql://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}")
@@ -55,15 +55,15 @@ def wait_for_db(engine, max_retries=10, delay_between_retries=5):
     logging.error(f"Failed to connect to the database after {max_retries} attempts.")
     return False
 
-def create_transactions_small_table(engine, metadata):
+def create_transactions_table(engine, metadata):
     """
-    Creates the 'transactions_small' table in the database using the provided engine and metadata.
+    Creates the 'transactions' table in the database using the provided engine and metadata.
     """
-    # Define the 'transaction_small' table structure
-    transactions_small_table = Table(table_name, metadata,
+    # Define the 'transactions' table structure
+    transactions_table = Table(table_name, metadata,
         Column('detecttime', TIMESTAMP),
-        Column('hash', VARCHAR(256), primary_key=True),
-        Column('curblocknumber', NUMERIC(18)),
+        Column('hash', VARCHAR(256)),
+        Column('curblocknumber', NUMERIC(18), index=True),
         Column('blockspending', INTEGER),
         Column('timepending', BIGINT),
         Column('gasprice', NUMERIC(38)),
@@ -73,7 +73,7 @@ def create_transactions_small_table(engine, metadata):
     )
     # Create the table
     metadata.create_all(engine)
-    logging.info("Table 'transactions_small' has been created/ensured in the database, with 'hash' as the primary key.")
+    logging.info("Table 'transactions' has been created/ensured in the database, with 'hash' as the primary key.")
 
 # Queue for directories to be processed
 directories_queue = Queue()
@@ -144,11 +144,16 @@ class File:
         try:
             self.data = pd.read_csv(self.path, sep='\t', compression='gzip', on_bad_lines='warn')
             # Convert double precision 'stuck' values to boolean:
-            self.data['stuck'] = self.data['stuck'].map({1: True, 0: False, 'true': True, 'false': False, 'True': True, 'False': False}).fillna(False)
+            # self.data['stuck'] = self.data['stuck'].map({1: True, 0: False, 'true': True, 'false': False, 'True': True, 'False': False}).fillna(False)
             # Filter the DataFrame for the desired conditions
             self.data = self.data[(self.data['status'] == 'confirmed') & (self.data['region'] == 'us-east-1') & (self.data['network'] == 'main')]
-            # Drop the 'status' and 'region' columns as they are no longer needed
-            self.data = self.data.drop(columns=['reorg', 'replace', 'gas', 'value', 'toaddress', 'fromaddress', 'input', 'type', 'maxpriorityfeepergas', 'maxfeepergas', 'basefeepergas', 'dropreason', 'rejectionreason', 'stuck', 'status', 'region', 'failurereason', 'network'])
+            
+            # only consider the columns you want to have, don't drop later
+            
+            # Drop the unneeded columns, in some files 'dropreason' column don't exist at all.
+            # if 'dropreason' not in self.data.columns:
+            #     self.data['dropreason'] = None
+            self.data = self.data.drop(columns=['reorg', 'replace', 'gas', 'value', 'toaddress', 'fromaddress', 'dropreason', 'input', 'type', 'maxpriorityfeepergas', 'maxfeepergas', 'basefeepergas', 'rejectionreason', 'stuck', 'status', 'region', 'failurereason', 'network'])
             return True
         except Exception as e:
             logging.error(f"Error loading data from file {self.path}: {e}")
@@ -228,7 +233,7 @@ if __name__ == "__main__":
         exit(1)
         
     metadata = MetaData()
-    create_transactions_small_table(engine, metadata)
+    create_transactions_table(engine, metadata)
     
     # Change directory_path to point to the "data" directory inside the current directory
     directory_path = os.path.join(os.getcwd(), "data")
