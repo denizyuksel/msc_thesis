@@ -32,7 +32,7 @@ table = Table(table_name, metadata,
     Column('block_number', NUMERIC(18), primary_key=True),
     
     # columns from aggregated blocknative data
-    Column('block_date', VARCHAR(100)),
+    Column('block_date', VARCHAR(100), index=True),
     Column('tx_count', INTEGER),
     Column('private_tx_count', INTEGER),
     Column('public_tx_count', INTEGER),

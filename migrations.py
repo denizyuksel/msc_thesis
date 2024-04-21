@@ -15,6 +15,7 @@ table_name_transactions = 'transactions'
 table_name_blocknative_blocks = 'blocknative_blocks'
 table_name_zeromev_data = 'zeromev_data'
 table_name_zeromev_data_backup = 'zeromev_data_backup'
+table_name_blocknative_zeromev = 'blocknative_zeromev'
 
 # Create a SQLAlchemy engine
 engine = create_engine(f"postgresql://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}")
@@ -27,6 +28,7 @@ transactions_table = metadata.tables[table_name_transactions]
 blocknative_blocks_table = metadata.tables[table_name_blocknative_blocks]
 zeromev_data_table = metadata.tables[table_name_zeromev_data]
 zeromev_data_table_backup = metadata.tables[table_name_zeromev_data_backup]
+blocknative_zeromev_table = metadata.tables[table_name_blocknative_zeromev]
 
 # The only index we need is detect_date.
 # Define the index for the 'hash' column
@@ -57,3 +59,7 @@ zeromev_data_table_backup = metadata.tables[table_name_zeromev_data_backup]
 # index_block_number_zeromev_backup = Index('index_blocknumber_zeromev_backup', zeromev_data_table_backup.c.block_number)
 # index_block_number_zeromev_backup.create(engine)
 # print(f'Index for blocknumber for {zeromev_data_table_backup} created!')
+
+# index_blocknative_zeromev_date = Index('index_blocknative_zeromev_date', blocknative_zeromev_table.c.block_date)
+# index_blocknative_zeromev_date.create(engine)
+# print(f'Index for block date for {blocknative_zeromev_table} created!')
