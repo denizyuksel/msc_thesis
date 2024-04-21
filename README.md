@@ -23,4 +23,7 @@ Deniz Yuksel, M.Sc. Thesis Repository. Ethereum data analysis using Blocknative 
 7. Implemented zeromev.py where I get zeromev data from zeromev API. This script also creates the table 'zeromev_data'
 8. Implemented aggregate.py which aggregates data for each block number in transactions, and omits the hashes and some other fields. Creates the table blocknative_blocks
    1. blocknative_blocks - 30MB, zeromev_data - 1359MB.
-9. Will implement a new python script that joins these two tables on block_number values (the ones in the blocknative_blocks are more important)
+9. Deleted most of the rows from zeromev_data because my blocks are coming from blocknative, and I took approx. 300k blocks where I cannot pull data from zeromev api for just the blocks I want (query takes 17 minutes)
+   1. 294050 blocks from blocknative
+   2. 290520 blocks from zeromev after deletion of non-blocknative blocks
+10. Joined blocknative_blocks and zeromev_data and created blocknative_zeromev table for final processing - updated migrations.py

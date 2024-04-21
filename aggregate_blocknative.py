@@ -14,7 +14,7 @@ log_directory = "logs"
 if not os.path.exists(log_directory):
     os.makedirs(log_directory)
 
-log_file_path = os.path.join(log_directory, "aggregate.log")
+log_file_path = os.path.join(log_directory, "aggregate_blocknative.log")
 logging.basicConfig(level=logging.INFO, filename=log_file_path, filemode='a',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
