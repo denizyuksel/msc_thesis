@@ -1,4 +1,3 @@
-
 import pandas as pd
 from sqlalchemy import create_engine
 import matplotlib.pyplot as plt
@@ -17,73 +16,55 @@ db_params = {
     'port': '5432'
 }
 
-table_name = 'transactions'
+table_name = 'blocknative_zeromev'
 engine = create_engine(f"postgresql://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}")
 
-## GASUSED PLOT
+# SQL query to retrieve transactions data aggregated by date
+query = f"SELECT * FROM {table_name} ORDER BY block_date ASC"
+data = pd.read_sql(query, engine)
 
-query_dates = f"SELECT DISTINCT detect_date FROM {table_name} ORDER BY detect_date ASC"
-dates = pd.read_sql(query_dates, engine)['detect_date']
-print("Date query over")
+# Convert 'block_date' to datetime format for plotting
+data['block_date'] = pd.to_datetime(data['block_date'])
 
-# Initialize list to store daily data
-daily_data_list = []
+# Aggregate data by date
+aggregated_data = data.groupby('block_date').agg({
+    'tx_count': 'sum',
+    'private_tx_count': 'sum',
+    'public_tx_count': 'sum',
+    'arb_count': 'sum',
+    'frontrun_count': 'sum',
+    'sandwich_count': 'sum',
+    'backrun_count': 'sum',
+    'liquid_count': 'sum'
+}).reset_index()
 
-for date in dates:
-    # Query to retrieve all transactions for the current date
-    query_transactions = f"""
-    SELECT * FROM {table_name}
-    WHERE detect_date = '{date}'
-    """
-    transactions = pd.read_sql(query_transactions, engine)
-    transactions = transactions.dropna(subset=['timepending'])
-    
-        # Process transactions for the current date
-    if not transactions.empty:
-        all_tx_count = len(transactions)
-        private_transactions = transactions[transactions['timepending'] == 0]
-        private_tx_count = len(private_transactions)
-        public_transactions = transactions[transactions['timepending'] != 0]
-        # public_transactions = transactions - private_transactions
-        public_tx_count = len(public_transactions)
-                
-        percentage_private = (private_tx_count / all_tx_count) * 100 if all_tx_count > 0 else 0
-        percentage_public = (public_tx_count / all_tx_count) * 100 if all_tx_count > 0 else 0
-        
-        print(f"percentage public: {percentage_public}, percentage private: {percentage_private}")
-        
-        # Append the daily data to the list
-        daily_data_list.append({
-            'date': date,
-            'percentage_private': percentage_private,
-            'percentage_public': percentage_public
-        })
-        
-# Convert the list of daily data into a DataFrame
-daily_data_df = pd.DataFrame(daily_data_list)
+# Calculate the percentages relative to total transactions
+aggregated_data['private_tx_pct'] = (aggregated_data['private_tx_count'] / aggregated_data['tx_count']) * 100
+aggregated_data['public_tx_pct'] = (aggregated_data['public_tx_count'] / aggregated_data['tx_count']) * 100
 
-# Convert 'date' to datetime format for plotting
-daily_data_df['date'] = pd.to_datetime(daily_data_df['date'])
-
-min_detect_date = daily_data_df['date'].min()
-print("Minimum date in the dataset without NAN timepending values is: ", min_detect_date)
+# Apply a 10-day rolling average to the percentage data
+aggregated_data['private_tx_pct_smooth'] = aggregated_data['private_tx_pct'].rolling(window=1, min_periods=1).mean()
+aggregated_data['public_tx_pct_smooth'] = aggregated_data['public_tx_pct'].rolling(window=1, min_periods=1).mean()
 
 # Plotting
-plt.figure(figsize=(15, 6))
-plt.fill_between(daily_data_df['date'], daily_data_df['percentage_private'], color='skyblue', alpha=0.4, label='Private Transactions')
-plt.fill_between(daily_data_df['date'], daily_data_df['percentage_private'], daily_data_df['percentage_public'], color='orange', alpha=0.4, label='Public Transactions')
+plt.figure(figsize=(8, 4))
 
-plt.title('Public And Private Transaction Percentages Over Time')
+# Plot both private and public transactions percentage curves
+plt.fill_between(aggregated_data['block_date'], 0, aggregated_data['private_tx_pct_smooth'], color='skyblue', alpha=0.7, label='Private Transactions')
+plt.fill_between(aggregated_data['block_date'], aggregated_data['private_tx_pct_smooth'], aggregated_data['private_tx_pct_smooth'] + aggregated_data['public_tx_pct_smooth'], color='orange', alpha=0.4, label='Public Transactions')
+
+plt.title('Percentage of Private and Public Transactions Over Time')
 plt.xlabel('Date')
-plt.ylabel('Percentage of Public/Private Transactions')
-plt.xlim(left=min_detect_date)
+plt.ylabel('Percentage of Transactions')
+plt.xlim(left=aggregated_data['block_date'].min())
 
 ax = plt.gca()
-ax.xaxis.set_major_locator(mdates.MonthLocator())  # Adjust depending on the date range
+ax.xaxis.set_major_locator(mdates.MonthLocator(interval=4))  # Show every fourth month
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
 plt.grid(True)
 plt.xticks(rotation=45)
 plt.legend()
 plt.tight_layout()
-plt.savefig('figures/tx_count_area.png')
+plt.savefig('figures/tx_percentage_stacked_area.png')
+plt.show()

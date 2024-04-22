@@ -36,28 +36,38 @@ aggregated_data = data.groupby('block_date').agg({
     'liquid_count': 'sum'
 }).reset_index()
 
-# Calculate the total MEV transactions and their percentages relative to the total transactions
+# Calculate the total MEV transactions
 aggregated_data['mev_tx_count'] = aggregated_data[['arb_count', 'frontrun_count', 'sandwich_count', 'backrun_count', 'liquid_count']].sum(axis=1)
-aggregated_data['private_tx_pct'] = (aggregated_data['private_tx_count'] / aggregated_data['tx_count']) * 100
-aggregated_data['mev_tx_pct'] = (aggregated_data['mev_tx_count'] / aggregated_data['tx_count']) * 100
+
+# Apply a rolling window for smoothing
+aggregated_data['mean_private_tx_count'] = aggregated_data['private_tx_count'].rolling(window=14).mean()
+aggregated_data['mean_mev_tx_count'] = aggregated_data['mev_tx_count'].rolling(window=14).mean()
 
 # Plotting
-plt.figure(figsize=(15, 6))
-plt.fill_between(aggregated_data['block_date'], 0, aggregated_data['private_tx_pct'], color='skyblue', alpha=0.4, label='Private Transactions')
-plt.fill_between(aggregated_data['block_date'], aggregated_data['private_tx_pct'], aggregated_data['private_tx_pct'] + aggregated_data['mev_tx_pct'], color='orange', alpha=0.4, label='MEV Transactions')
+fig, ax1 = plt.subplots(figsize=(8, 5))  # Adjusted to fit on A4 paper in landscape orientation
 
-plt.title('Comparison of Private and MEV Transactions Over Time')
-plt.xlabel('Date')
-plt.ylabel('Percentage of Total Transactions')
-plt.xlim(left=aggregated_data['block_date'].min())
+# Plot for private transactions percentage
+ax1.fill_between(aggregated_data['block_date'], 0, aggregated_data['mean_private_tx_count'], color='skyblue', alpha=0.4, label='Private Transactions')
+ax1.set_xlabel('Date')
+ax1.set_ylabel('Count of Private Transactions', color='blue')
+ax1.tick_params(axis='y', labelcolor='blue')
+ax1.set_xlim(left=aggregated_data['block_date'].min())
 
-ax = plt.gca()
-ax.xaxis.set_major_locator(mdates.MonthLocator())  # Adjust depending on the date range
-ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+ax2 = ax1.twinx()  # Instantiate a second axes that shares the same x-axis
+# Plot for MEV transaction count
+ax2.plot(aggregated_data['block_date'], aggregated_data['mean_mev_tx_count'], color='red', label='MEV Transaction Count')
+ax2.set_ylabel('MEV Transaction Count', color='red')
+ax2.tick_params(axis='y', labelcolor='red')
 
+ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=4))  # Set to every four months
+ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+
+# Apply the x-tick rotation here
+labels = ax1.get_xticklabels()
+ax1.set_xticklabels(labels, rotation=45, ha='right')
+
+fig.tight_layout()  # Call tight_layout after setting rotation to accommodate label spacing
 plt.grid(True)
-plt.xticks(rotation=45)
-plt.legend()
-plt.tight_layout()
-plt.savefig('figures/private_mev_ratio.png')
+fig.legend(loc="upper right", bbox_to_anchor=(1,1), bbox_transform=ax1.transAxes)
+plt.savefig('figures/two_week_mean_private_mev_ratio_a4_dual_axis.png')
 plt.show()

@@ -1,4 +1,3 @@
-
 import pandas as pd
 from sqlalchemy import create_engine
 import matplotlib.pyplot as plt
@@ -47,8 +46,13 @@ transaction_types = ['arb_count', 'frontrun_count', 'sandwich_count', 'backrun_c
 for tx_type in transaction_types:
     aggregated_data[f'{tx_type}_pct'] = (aggregated_data[tx_type] / aggregated_data['mev_tx_count']) * 100
 
+# Apply a 10-day rolling average to the percentage data
+for tx_type in transaction_types:
+    pct_col = f'{tx_type}_pct'
+    aggregated_data[pct_col] = aggregated_data[pct_col].rolling(window=14, min_periods=1).mean()
+
 # Plotting
-plt.figure(figsize=(15, 6))
+plt.figure(figsize=(8, 4))
 
 colors = ['skyblue', 'orange', 'green', 'red', 'purple']
 labels = ['Arb Transactions', 'Frontrun Transactions', 'Sandwich Transactions', 'Backrun Transactions', 'Liquid Transactions']
@@ -66,7 +70,7 @@ plt.ylabel('Percentage of MEV Transactions')
 plt.xlim(left=aggregated_data['block_date'].min())
 
 ax = plt.gca()
-ax.xaxis.set_major_locator(mdates.MonthLocator())  # Adjust depending on the date range
+ax.xaxis.set_major_locator(mdates.MonthLocator(interval=4))  # Adjust depending on the date range
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
 plt.grid(True)
