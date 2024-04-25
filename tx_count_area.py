@@ -38,13 +38,18 @@ aggregated_data = data.groupby('block_date').agg({
     'liquid_count': 'sum'
 }).reset_index()
 
-# Calculate the percentages relative to total transactions
-aggregated_data['private_tx_pct'] = (aggregated_data['private_tx_count'] / aggregated_data['tx_count']) * 100
-aggregated_data['public_tx_pct'] = (aggregated_data['public_tx_count'] / aggregated_data['tx_count']) * 100
+# Calculate the total MEV transactions
+aggregated_data['mev_tx_count'] = aggregated_data[['arb_count', 'frontrun_count', 'sandwich_count', 'backrun_count', 'liquid_count']].sum(axis=1)
+
+# Calculate percentages for each transaction type relative to MEV transactions
+transaction_types = ['arb_count', 'frontrun_count', 'sandwich_count', 'backrun_count', 'liquid_count']
+for tx_type in transaction_types:
+    aggregated_data[f'{tx_type}_pct'] = (aggregated_data[tx_type] / aggregated_data['mev_tx_count']) * 100
 
 # Apply a 10-day rolling average to the percentage data
-aggregated_data['private_tx_pct_smooth'] = aggregated_data['private_tx_pct'].rolling(window=1, min_periods=1).mean()
-aggregated_data['public_tx_pct_smooth'] = aggregated_data['public_tx_pct'].rolling(window=1, min_periods=1).mean()
+for tx_type in transaction_types:
+    pct_col = f'{tx_type}_pct'
+    aggregated_data[pct_col] = aggregated_data[pct_col].rolling(window=14, min_periods=1).mean()
 
 # Plotting
 plt.figure(figsize=(8, 4))

@@ -28,9 +28,6 @@ data['block_date'] = pd.to_datetime(data['block_date'])
 
 # Aggregate data by date
 aggregated_data = data.groupby('block_date').agg({
-    'tx_count': 'sum',
-    'private_tx_count': 'sum',
-    'public_tx_count': 'sum',
     'arb_count': 'sum',
     'frontrun_count': 'sum',
     'sandwich_count': 'sum',
@@ -55,7 +52,7 @@ for tx_type in transaction_types:
 plt.figure(figsize=(8, 4))
 
 colors = ['skyblue', 'orange', 'green', 'red', 'purple']
-labels = ['Arb Transactions', 'Frontrun Transactions', 'Sandwich Transactions', 'Backrun Transactions', 'Liquid Transactions']
+labels = ['Arb', 'Frontrun', 'Sandwich', 'Backrun', 'Liquid']
 
 # Start from 0 bottom, incrementally add the previous percentage
 bottom = 0
@@ -66,7 +63,8 @@ for i, col in enumerate(transaction_types):
 
 plt.title('Percentage of Each MEV Transaction Type Over Time')
 plt.xlabel('Date')
-plt.ylabel('Percentage of MEV Transactions')
+plt.ylabel('Percentage of Total MEV Transactions per Day')
+plt.ylim(0, 100)  # Ensuring y-axis is capped at 100%
 plt.xlim(left=aggregated_data['block_date'].min())
 
 ax = plt.gca()
@@ -77,5 +75,5 @@ plt.grid(True)
 plt.xticks(rotation=45)
 plt.legend()
 plt.tight_layout()
-plt.savefig('figures/zeromev_tx_percentage_area.png')
-plt.show()
+plt.savefig('figures/mev_types_area.png')
+# plt.show()
