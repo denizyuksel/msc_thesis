@@ -27,3 +27,5 @@ Deniz Yuksel, M.Sc. Thesis Repository. Ethereum data analysis using Blocknative 
    1. 294050 blocks from blocknative
    2. 290520 blocks from zeromev after deletion of non-blocknative blocks
 10. Joined blocknative_blocks and zeromev_data and created blocknative_zeromev table for final processing - updated migrations.py
+11. Generating plots from blocknative_zeromev table.
+12. Exported blocknative_zeromev table from database as a csv file to be able to work from other computers - will need to modify code to pd.read_csv instead of db queries.
