@@ -7,6 +7,7 @@ from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
 localhost_name = 'localhost'
+
 db_params = {
     'host': localhost_name,
     'database': 'thesisdb',
@@ -27,50 +28,46 @@ data['block_date'] = pd.to_datetime(data['block_date'])
 
 # Aggregate data by date
 aggregated_data = data.groupby('block_date').agg({
-    'tx_count': 'mean',
-    'private_tx_count': 'mean',
-    'public_tx_count': 'mean',
     'arb_count': 'mean',
     'frontrun_count': 'mean',
     'sandwich_count': 'mean',
     'backrun_count': 'mean',
     'liquid_count': 'mean',
-    'swap_count': 'mean',
+    'swap_count': 'mean'
 }).reset_index()
 
-# Apply a 14-day rolling window to each column
-window_size = 14
-smoothed_data = aggregated_data.copy()
+# Apply a 14-day rolling average to the counts
 for col in ['arb_count', 'frontrun_count', 'sandwich_count', 'backrun_count', 'liquid_count', 'swap_count']:
-    smoothed_data[col] = aggregated_data[col].rolling(window=window_size).mean()
-
-# Calculating the bottom for each stack in the smoothed data
-bottoms = smoothed_data[['arb_count', 'frontrun_count', 'sandwich_count', 'backrun_count', 'liquid_count', 'swap_count']].cumsum(axis=1).shift(axis=1).fillna(0)
+    aggregated_data[col] = aggregated_data[col].rolling(window=14, min_periods=1).mean()
 
 # Plotting
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(12, 6))
 
-colors = ['skyblue', 'orange', 'green', 'red', 'purple', 'brown']
+colors = ['skyblue', 'orange', 'green', 'red', 'purple', 'pink']
 labels = ['Arb', 'Frontrun', 'Sandwich', 'Backrun', 'Liquid', 'Swap']
 
-# Create a list to control the order of plotting explicitly
-plot_order = ['arb_count', 'frontrun_count', 'sandwich_count', 'backrun_count', 'liquid_count', 'swap_count']
+# Start from 0 bottom, incrementally add the previous smoothed count
+bottom = pd.Series([0] * len(aggregated_data))
 
-for i, col in enumerate(plot_order):
-    plt.fill_between(smoothed_data['block_date'], bottoms[col], smoothed_data[col] + bottoms[col], color=colors[i], alpha=0.4, label=labels[i])
+for i, col in enumerate(['arb_count', 'frontrun_count', 'sandwich_count', 'backrun_count', 'liquid_count', 'swap_count']):
+    plt.fill_between(aggregated_data['block_date'], bottom, bottom + aggregated_data[col], color=colors[i], label=labels[i], step='mid', alpha=0.6)
+    bottom += aggregated_data[col]
 
-plt.title('Ratio of Total MEV Transactions And Swaps per Day')
+plt.title('Average Count per Block of Each MEV Transaction Type Over Time')
 plt.xlabel('Date')
-plt.ylabel('Averge Count of Transactions per Block')
-plt.xlim(left=smoothed_data['block_date'].min())
+plt.ylabel('Average Block Count of MEV Transactions per Day')
+plt.xlim(left=aggregated_data['block_date'].min())
+plt.ylim(bottom=1)  # Set a minimum y value to avoid taking log of zero
 
 ax = plt.gca()
-ax.set_yscale('log')  # Set the y-axis to a logarithmic scale
-ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=range(1, 13, 3)))  # Adjust depending on the date range
+ax.set_yscale('log')  # Setting the y-axis to a logarithmic scale
+
+ax.xaxis.set_major_locator(mdates.MonthLocator(interval=4))  # Adjust depending on the date range
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
 plt.grid(True)
 plt.xticks(rotation=45)
-plt.legend()
+plt.legend(loc='upper left')
 plt.tight_layout()
-plt.savefig('figures/mev_types_with_swap_block.png')
+plt.savefig('figures/count_mev_types_with_swap_block.png')
+# plt.show()

@@ -6,14 +6,22 @@ venv_activate = 'thesis_env\\Scripts\\activate.bat'
 
 # List of Python scripts to run
 scripts = [
-    'gasused_area_block_avg.py',
-    'gasused_area.py',
-    'gasused_plot_block_avg.py',
-    'gasused_plot.py',
-    'tx_count_area_block_avg.py',
-    'tx_count_area.py',
-    'tx_count_plot_block_avg.py',
-    'tx_count_plot.py'
+    'count_bar_without_swap.py',
+    'count_mev_types_block.py',
+    'count_mev_types_with_swap_block.py',
+    'count_mev_types_with_swap.py',
+    'count_mev_types.py',
+    'count_plot_mev_types_with_swap.py',
+    
+    'pct_mev_types_block.py',
+    'pct_mev_types_with_swap.py',
+    'pct_mev_types.py',
+    
+    'private_mev_ratio_block.py',
+    'private_mev_ratio_equal_scale_block.py',
+    'private_mev_ratio_equal_scale.py',
+    'private_mev_ratio.py',
+    
 ]
 
 def run_script(script_name):

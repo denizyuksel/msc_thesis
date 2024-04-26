@@ -70,7 +70,7 @@ ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
 
 # Apply the x-tick rotation here
 labels = ax1.get_xticklabels()
-ax1.set_xticklabels(labels, rotation=45, ha='right')
+ax1.set_xticklabels(labels, rotation=45, ha='center')
 
 fig.tight_layout()
 plt.grid(True)

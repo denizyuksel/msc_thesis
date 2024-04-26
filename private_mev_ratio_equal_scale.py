@@ -75,10 +75,10 @@ ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
 
 # Apply the x-tick rotation here
 labels = ax1.get_xticklabels()
-ax1.set_xticklabels(labels, rotation=45, ha='right')
+ax1.set_xticklabels(labels, rotation=45, ha='center')
 
 fig.tight_layout()  # Call tight_layout after setting rotation to accommodate label spacing
 plt.grid(True)
 fig.legend(loc="upper right", bbox_to_anchor=(1,1), bbox_transform=ax1.transAxes)
 plt.savefig('figures/private_mev_ratio_equal_scale.png')
-plt.show()
+# plt.show()
