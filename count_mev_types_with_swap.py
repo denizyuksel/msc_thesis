@@ -64,6 +64,17 @@ ax.set_yscale('log')  # Set the y-axis to a logarithmic scale
 ax.xaxis.set_major_locator(mdates.MonthLocator(interval=4))  # Adjust depending on the date range
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
+# FTX collapse in November 2022 and the USDC depeg in March 2023, FB Protect Launch october 2021
+fb_launch_date = '2021-10-06'
+mev_blocker_launch_date = '2023-04-27'
+ftx_collapse = '2022-11-11'
+usdc_depeg = '2023-03-11'
+# Dashed lines for the specified dates
+ax.axvline(pd.Timestamp(fb_launch_date), color='brown', linestyle='--', label='Flashbots Protect Launch Date (Oct 2021)')
+ax.axvline(pd.Timestamp(mev_blocker_launch_date), color='purple', linestyle='--', label='MEV Blocker Launch Date (Apr 2023)')
+ax.axvline(pd.Timestamp(ftx_collapse), color='orange', linestyle='--', label='FTX Collapse Date (Nov 2022)')
+ax.axvline(pd.Timestamp(usdc_depeg), color='magenta', linestyle='--', label='USDC Depeg Date (Mar 2023)')
+
 plt.grid(True)
 plt.xticks(rotation=45)
 plt.legend(loc='upper left')

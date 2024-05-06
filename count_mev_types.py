@@ -49,7 +49,7 @@ labels = ['Arb', 'Frontrun', 'Sandwich', 'Backrun', 'Liquid']
 bottom = pd.Series([0] * len(aggregated_data))
 
 for i, col in enumerate(['arb_count', 'frontrun_count', 'sandwich_count', 'backrun_count', 'liquid_count']):
-    plt.fill_between(aggregated_data['block_date'], bottom, bottom + aggregated_data[col], color=colors[i], label=labels[i], step='mid', alpha=0.6)
+    plt.fill_between(aggregated_data['block_date'], bottom, bottom + aggregated_data[col], color=colors[i], label=labels[i], step='mid', alpha=0.4)
     bottom += aggregated_data[col]
 
 plt.title('Count of Each MEV Transaction Type Over Time')
@@ -61,6 +61,16 @@ plt.ylim(0)  # Setting the lower y-axis limit to 0
 ax = plt.gca()
 ax.xaxis.set_major_locator(mdates.MonthLocator(interval=4))  # Adjust depending on the date range
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+
+fb_launch_date = '2021-10-06'
+ftx_collapse = '2022-11-11'
+usdc_depeg = '2023-03-11'
+mev_blocker_launch_date = '2023-04-27'
+# Dashed lines for the specified dates
+ax.axvline(pd.Timestamp(fb_launch_date), color='brown', linestyle='--', label='Flashbots Protect Launch Date (Oct 2021)')
+ax.axvline(pd.Timestamp(ftx_collapse), color='orange', linestyle='--', label='FTX Collapse Date (Nov 2022)')
+ax.axvline(pd.Timestamp(usdc_depeg), color='magenta', linestyle='--', label='USDC Depeg Date (Mar 2023)')
+ax.axvline(pd.Timestamp(mev_blocker_launch_date), color='purple', linestyle='--', label='MEV Blocker Launch Date (Apr 2023)')
 
 plt.grid(True)
 plt.xticks(rotation=45)

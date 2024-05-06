@@ -61,9 +61,21 @@ ax1.set_xlim(left=aggregated_data['block_date'].min())
 
 ax2 = ax1.twinx()  # Instantiate a second axes that shares the same x-axis
 # Plot for MEV transaction percentage
-ax2.plot(aggregated_data['block_date'], aggregated_data['mean_mev_tx_percentage'], color='red', label='MEV Transactions (%)')
+# ax2.fill_between(aggregated_data['block_date'], 0, aggregated_data['mean_mev_tx_percentage'], color='red', alpha=0.4, label='MEV Transactions (%)')
+ax2.plot(aggregated_data['block_date'], aggregated_data['mean_mev_tx_percentage'], color='red', alpha=0.6, label='MEV Transactions (%)')
 ax2.set_ylabel('MEV Transaction Percentage per Day', color='red')
 ax2.tick_params(axis='y', labelcolor='red')
+
+# FTX collapse in November 2022 and the USDC depeg in March 2023, FB Protect Launch october 2021
+fb_launch_date = '2021-10-06'
+mev_blocker_launch_date = '2023-04-27'
+ftx_collapse = '2022-11-11'
+usdc_depeg = '2023-03-11'
+# Dashed lines for the specified dates
+ax1.axvline(pd.Timestamp(fb_launch_date), color='brown', linestyle='--', label='Flashbots Protect Launch Date (Oct 2021)')
+ax1.axvline(pd.Timestamp(mev_blocker_launch_date), color='purple', linestyle='--', label='MEV Blocker Launch Date (Apr 2023)')
+ax1.axvline(pd.Timestamp(ftx_collapse), color='orange', linestyle='--', label='FTX Collapse Date (Nov 2022)')
+ax1.axvline(pd.Timestamp(usdc_depeg), color='magenta', linestyle='--', label='USDC Depeg Date (Mar 2023)')
 
 ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=4))  # Set to every four months
 ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
@@ -74,6 +86,6 @@ ax1.set_xticklabels(labels, rotation=45, ha='center')
 
 fig.tight_layout()  # Call tight_layout after setting rotation to accommodate label spacing
 plt.grid(True)
-fig.legend(loc="upper right", bbox_to_anchor=(1,1), bbox_transform=ax1.transAxes)
+fig.legend(loc="upper left", bbox_to_anchor=(0,1), bbox_transform=ax1.transAxes)
 plt.savefig('figures/private_mev_ratio.png')
 # plt.show()

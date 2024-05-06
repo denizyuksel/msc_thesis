@@ -49,7 +49,7 @@ for tx_type in transaction_types:
     aggregated_data[pct_col] = aggregated_data[pct_col].rolling(window=14, min_periods=1).mean()
 
 # Plotting
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(16, 10))
 
 colors = ['skyblue', 'orange', 'green', 'red', 'purple']
 labels = ['Arb', 'Frontrun', 'Sandwich', 'Backrun', 'Liquid']
@@ -71,9 +71,19 @@ ax = plt.gca()
 ax.xaxis.set_major_locator(mdates.MonthLocator(interval=4))  # Adjust depending on the date range
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
+fb_launch_date = '2021-10-06'
+ftx_collapse = '2022-11-11'
+usdc_depeg = '2023-03-11'
+mev_blocker_launch_date = '2023-04-27'
+# Dashed lines for the specified dates
+ax.axvline(pd.Timestamp(fb_launch_date), color='brown', linestyle='--', label='Flashbots Protect Launch Date (Oct 2021)')
+ax.axvline(pd.Timestamp(ftx_collapse), color='orange', linestyle='--', label='FTX Collapse Date (Nov 2022)')
+ax.axvline(pd.Timestamp(usdc_depeg), color='magenta', linestyle='--', label='USDC Depeg Date (Mar 2023)')
+ax.axvline(pd.Timestamp(mev_blocker_launch_date), color='purple', linestyle='--', label='MEV Blocker Launch Date (Apr 2023)')
+
 plt.grid(True)
 plt.xticks(rotation=45)
-plt.legend()
+plt.legend(fontsize='x-small')
 plt.tight_layout()
 plt.savefig('figures/pct_mev_types.png')
 # plt.show()
