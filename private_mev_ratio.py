@@ -3,89 +3,99 @@ from sqlalchemy import create_engine
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from pandas.plotting import register_matplotlib_converters
+from scipy.stats import pearsonr, spearmanr
 
 register_matplotlib_converters()
 
-localhost_name = 'localhost'
-db_params = {
-    'host': localhost_name,
-    'database': 'thesisdb',
-    'user': 'postgres',
-    'password': 'admin',
-    'port': '5432'
-}
-
-table_name = 'blocknative_zeromev'
-engine = create_engine(f"postgresql://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}")
-
-# SQL query to retrieve transactions data aggregated by date
-query = f"SELECT * FROM {table_name} ORDER BY block_date ASC"
-data = pd.read_sql(query, engine)
+# Read data from CSV file
+data = pd.read_csv('flashbots_blocknative.csv')
 
 # Convert 'block_date' to datetime format for plotting
 data['block_date'] = pd.to_datetime(data['block_date'])
+
+data = data[data['block_date'] <= pd.Timestamp('2022-09-15')]
+# data = data[(data['block_date'] > pd.Timestamp('2021-03-01')) & (data['block_date'] <= pd.Timestamp('2022-07-01'))]
 
 # Aggregate data by date
 aggregated_data = data.groupby('block_date').agg({
     'tx_count': 'sum',
     'private_tx_count': 'sum',
     'arb_count': 'sum',
-    'frontrun_count': 'sum',
+    # 'frontrun_count': 'sum',
     'sandwich_count': 'sum',
-    'backrun_count': 'sum',
-    'liquid_count': 'sum'
+    # 'backrun_count': 'sum',
+    'liquid_count': 'sum',
+    'bundle_tx_count': 'sum',
 }).reset_index()
 
 # Calculate the total MEV transactions
-aggregated_data['mev_tx_count'] = aggregated_data[['arb_count', 'frontrun_count', 'sandwich_count', 'backrun_count', 'liquid_count']].sum(axis=1)
+aggregated_data['mev_tx_count'] = aggregated_data[['arb_count', 'sandwich_count', 'liquid_count']].sum(axis=1)
 
 # Calculate percentages
-aggregated_data['private_tx_percentage'] = 100 * aggregated_data['private_tx_count'] / aggregated_data['tx_count']
-aggregated_data['mev_tx_percentage'] = 100 * aggregated_data['mev_tx_count'] / aggregated_data['tx_count']
+# aggregated_data['private_tx_percentage'] = 100 * aggregated_data['private_tx_count'] / aggregated_data['tx_count']
+# aggregated_data['mev_tx_percentage'] = 100 * aggregated_data['mev_tx_count'] / aggregated_data['tx_count']
 
 # Apply a rolling window for smoothing
-aggregated_data['mean_private_tx_percentage'] = aggregated_data['private_tx_percentage'].rolling(window=14).mean()
-aggregated_data['mean_mev_tx_percentage'] = aggregated_data['mev_tx_percentage'].rolling(window=14).mean()
+aggregated_data['rolling_private_tx'] = aggregated_data['private_tx_count'].rolling(window=14).mean()
+aggregated_data['rolling_mev_tx'] = aggregated_data['mev_tx_count'].rolling(window=14).mean()
+aggregated_data['rolling_bundle_tx'] = aggregated_data['bundle_tx_count'].rolling(window=14).mean()
+
+# Calculate Pearson and Spearman correlation coefficients on the raw data
+pearson_corr, pearson_p_value = pearsonr(aggregated_data.dropna()['private_tx_count'], aggregated_data.dropna()['bundle_tx_count'])
+spearman_corr, spearman_p_value = spearmanr(aggregated_data.dropna()['private_tx_count'], aggregated_data.dropna()['bundle_tx_count'])
 
 # Plotting
-fig, ax1 = plt.subplots(figsize=(8, 6))  # Adjusted to fit on A4 paper in landscape orientation
+fig, ax = plt.subplots(figsize=(8, 4))  # Adjusted to fit on A4 paper in landscape orientation
 
-plt.title('Total Number of Private & MEV Transactions Ratio Per Day')
+plt.title('Total Number of MEV Transactions Per Day')
+ax.plot(aggregated_data['block_date'], aggregated_data['rolling_mev_tx'], color='red', label='MEV Count')
+ax.plot(aggregated_data['block_date'], aggregated_data['rolling_bundle_tx'], color='green', label='Bundle Count')
+ax.plot(aggregated_data['block_date'], aggregated_data['rolling_private_tx'], color='skyblue', label='Private Count')
+ax.set_xlabel('Date')
+ax.set_ylabel('Daily MEV Transaction Count', color='red')
+ax.tick_params(axis='y', labelcolor='red')
+ax.set_xlim(left=aggregated_data['block_date'].min())
+
+plt.title('Pre-Merge Number of Private, MEV Transactions & Bundle Counts Per Day')
 
 # Plot for private transactions percentage
-ax1.fill_between(aggregated_data['block_date'], 0, aggregated_data['mean_private_tx_percentage'], color='skyblue', alpha=0.4, label='Private Transactions (%)')
-ax1.set_xlabel('Date')
-ax1.set_ylabel('Percentage of Total Number of Private Transactions per Day', color='blue')
-ax1.tick_params(axis='y', labelcolor='blue')
-ax1.set_xlim(left=aggregated_data['block_date'].min())
+ax.set_xlabel('Date')
+ax.set_ylabel('Count per Day', color='blue')
+ax.tick_params(axis='y', labelcolor='blue')
+ax.set_xlim(left=aggregated_data['block_date'].min())
 
-ax2 = ax1.twinx()  # Instantiate a second axes that shares the same x-axis
-# Plot for MEV transaction percentage
-# ax2.fill_between(aggregated_data['block_date'], 0, aggregated_data['mean_mev_tx_percentage'], color='red', alpha=0.4, label='MEV Transactions (%)')
-ax2.plot(aggregated_data['block_date'], aggregated_data['mean_mev_tx_percentage'], color='red', alpha=0.6, label='MEV Transactions (%)')
-ax2.set_ylabel('MEV Transaction Percentage per Day', color='red')
-ax2.tick_params(axis='y', labelcolor='red')
 
-# FTX collapse in November 2022 and the USDC depeg in March 2023, FB Protect Launch october 2021
-fb_launch_date = '2021-10-06'
-mev_blocker_launch_date = '2023-04-27'
-ftx_collapse = '2022-11-11'
-usdc_depeg = '2023-03-11'
-# Dashed lines for the specified dates
-ax1.axvline(pd.Timestamp(fb_launch_date), color='brown', linestyle='--', label='Flashbots Protect Launch Date (Oct 2021)')
-ax1.axvline(pd.Timestamp(mev_blocker_launch_date), color='purple', linestyle='--', label='MEV Blocker Launch Date (Apr 2023)')
-ax1.axvline(pd.Timestamp(ftx_collapse), color='orange', linestyle='--', label='FTX Collapse Date (Nov 2022)')
-ax1.axvline(pd.Timestamp(usdc_depeg), color='magenta', linestyle='--', label='USDC Depeg Date (Mar 2023)')
+# Significant dates as vertical lines
+significant_dates = {
+    '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch Date (Oct 2021)'),
+    # Uncomment below for full data (after merge)
+    # '2022-09-15': ('red', '-.', 'The Merge (Sept 2022)'),
+    # '2022-11-11': ('deepskyblue', ':', 'FTX Collapse Date (Nov 2022)'),
+    # '2023-03-11': ('fuchsia', '--', 'USDC Depeg Date (Mar 2023)'),
+    # '2023-04-27': ('indigo', '-.', 'MEV Blocker Launch Date (Apr 2023)')
+}
+for date, (color, linestyle, label) in significant_dates.items():
+    ax.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
 
-ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=4))  # Set to every four months
-ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+ax.xaxis.set_major_locator(mdates.MonthLocator(interval=4))  # Set to every four months
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
 
-# Apply the x-tick rotation here
-labels = ax1.get_xticklabels()
-ax1.set_xticklabels(labels, rotation=45, ha='center')
+# Annotate Pearson and Spearman correlation coefficients in the top right
+ax.annotate(f'Pearson Corr (private vs bundle): {pearson_corr:.2f}, p-value: {pearson_p_value:.3f}', xy=(0, 1), xycoords='axes fraction', verticalalignment='top', horizontalalignment='left', color='black')
+ax.annotate(f'Spearman Corr (private vs bundle): {spearman_corr:.2f}, p-value: {spearman_p_value:.3f}', xy=(0, 0.95), xycoords='axes fraction', verticalalignment='top', horizontalalignment='left', color='black')
 
-fig.tight_layout()  # Call tight_layout after setting rotation to accommodate label spacing
+# Rotate x-tick labels
+plt.xticks(rotation=45, ha='center')
+
+# Tight layout for label spacing
+plt.tight_layout()
+
+# Add grid
 plt.grid(True)
-fig.legend(loc="upper left", bbox_to_anchor=(0,1), bbox_transform=ax1.transAxes)
-plt.savefig('figures/private_mev_ratio.png')
+
+# Move the legend to the top right
+plt.legend(loc="upper right", bbox_to_anchor=(1,1), bbox_transform=ax.transAxes)
+
+plt.grid(True)
+plt.savefig('figures/private_mev_bundle.png')
 # plt.show()

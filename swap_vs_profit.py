@@ -33,32 +33,40 @@ aggregated_data = data.groupby('block_date').agg({
 }).reset_index()
 
 # Apply a 7-day rolling window to smooth the data
-aggregated_data['smoothed_user_swap_volume'] = aggregated_data['total_user_swap_volume'].rolling(window=14, center=True).mean()
-aggregated_data['smoothed_extractor_profit'] = aggregated_data['total_extractor_profit'].rolling(window=14, center=True).mean()
+aggregated_data['smoothed_user_swap_volume'] = aggregated_data['total_user_swap_volume'].rolling(window=1, center=True).mean()
+aggregated_data['smoothed_extractor_profit'] = aggregated_data['total_extractor_profit'].rolling(window=1, center=True).mean()
 
 # Calculate Pearson and Spearman correlation coefficients on the smoothed data
 pearson_corr, pearson_p_value = pearsonr(aggregated_data.dropna()['smoothed_user_swap_volume'], aggregated_data.dropna()['smoothed_extractor_profit'])
 spearman_corr, spearman_p_value = spearmanr(aggregated_data.dropna()['smoothed_user_swap_volume'], aggregated_data.dropna()['smoothed_extractor_profit'])
 
 # Plotting
-fig, ax = plt.subplots(figsize=(10, 6))
+fig, ax = plt.subplots(figsize=(8, 4))
 ax.set_yscale('log')  # Setting the y-axis to logarithmic scale
 
-plt.title('Daily Total User Swap Volume and Extractor Profit (2-Week Rolling Window)')
+plt.title('Daily Total User Swap Volume and Extractor Profit (No Rolling Window)')
+
+ax.set_yscale('symlog', linthresh=1)  # Setting a linear threshold around zero
+
 
 # Plot for smoothed total user swap volume and total extractor profit
-ax.plot(aggregated_data['block_date'], aggregated_data['smoothed_user_swap_volume'], color='cyan', label='Smoothed Total User Swap Volume (USD)')
-ax.plot(aggregated_data['block_date'], aggregated_data['smoothed_extractor_profit'], color='magenta', label='Smoothed Total Extractor Profit (USD)')
+ax.plot(aggregated_data['block_date'], aggregated_data['smoothed_user_swap_volume'], color='cyan', label='Total User Swap Volume (USD)')
+ax.plot(aggregated_data['block_date'], aggregated_data['smoothed_extractor_profit'], color='magenta', label='Total Extractor Profit (USD)')
 ax.set_xlabel('Date')
 ax.set_ylabel('Amount (USD - Log Scale)')
 
-mev_blocker_launch_date = '2023-04-27'
+# Important dates
+fb_launch_date = '2021-10-06'
+the_merge = '2022-09-15'
 ftx_collapse = '2022-11-11'
 usdc_depeg = '2023-03-11'
+mev_blocker_launch_date = '2023-04-27'
 # Dashed lines for the specified dates
-ax.axvline(pd.Timestamp(mev_blocker_launch_date), color='green', linestyle='--', label='MEV Blocker Launch Date (Apr 2023)')
-ax.axvline(pd.Timestamp(ftx_collapse), color='orange', linestyle='--', label='FTX Collapse Date (Nov 2022)')
-ax.axvline(pd.Timestamp(usdc_depeg), color='red', linestyle='--', label='USDC Depeg Date (Mar 2023)')
+ax.axvline(pd.Timestamp(fb_launch_date), color='darkred', linestyle='--', linewidth=2, label='Flashbots Protect Launch Date (Oct 2021)')
+ax.axvline(pd.Timestamp(the_merge), color='red', linestyle='-.', linewidth=2, label='The Merge (Sept 2022)')
+ax.axvline(pd.Timestamp(ftx_collapse), color='deepskyblue', linestyle=':', linewidth=2, label='FTX Collapse Date (Nov 2022)')
+ax.axvline(pd.Timestamp(usdc_depeg), color='fuchsia', linestyle='--', linewidth=2, label='USDC Depeg Date (Mar 2023)')
+ax.axvline(pd.Timestamp(mev_blocker_launch_date), color='indigo', linestyle='-.', linewidth=2, label='MEV Blocker Launch Date (Apr 2023)')
 
 # Annotate Pearson and Spearman correlation coefficients in the top right
 ax.annotate(f'Pearson Corr: {pearson_corr:.2f}, p-value: {pearson_p_value:.3f}', xy=(1, 1), xycoords='axes fraction', verticalalignment='top', horizontalalignment='right', color='black')
@@ -69,10 +77,10 @@ ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
 
 # Apply the x-tick rotation here
 labels = ax.get_xticklabels()
-plt.setp(labels, rotation=45, horizontalalignment='right')
+ax.set_xticklabels(labels, rotation=45, ha='center')
 
 fig.tight_layout()
 plt.grid(True)
 ax.legend(loc="upper left", bbox_to_anchor=(0,1), bbox_transform=ax.transAxes)
-plt.savefig('figures/swap_vs_profit.png')
+plt.savefig('figures/swap_vs_profit_1_window.png')
 # plt.show()

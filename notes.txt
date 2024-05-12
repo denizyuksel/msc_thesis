@@ -1,0 +1,67 @@
+01.11.2021'de private tx var
+2021-10-01 private var
+01.01.2021: private yok
+01.06.2021: private yok
+01.09.2021: private var
+01.08.2021: private var
+01.07.2021: private var
+15.06.2021: private tek tuk var
+12.06.2021: private tek tuk
+06.06.2021: private tek tuk
+02.06.2021: private tx speedup & cancel only
+03.06.2021: private tx, speedup & cancel only 
+30.05.2021: no private tx
+
+
+NOTES:
+!!! There are 27 fields in blocknative data schema
+
+9:43 - start downloading 6 month data
+error files:
+- 20210423: expected 27 fields in line 150432, saw 28
+- 20210601: expected 27 fields in line 76601, saw 28
+10:33 - end of process
+data size - 4840 MB
+
+50 minutes: 5 GB data - 213 days - 1 hour per day
+
+
+I need 1232 days 
+
+
+Error lines 20210423
+line 150432:
+2021-04-23T18:12:38.764Z	0x83cefa0c5607697a791c1ae9d825254bea8234469eee06e602b677b9ec6c1177	failed	us-east-1	""	""	12298048	"Reverted: \"\"Yh/	Â¶SÂ²6Â·\"\"Â"	1	11224	21	196735	74000000000	0	0x7a250d5630b4cf539739df2c5dacb4c659f2488d	0xd220df609462ed0e9ce688fc31e8253348a1e5e5	0x38ed17390000000000000000000000000000000000000000000000000000000059682f0000000000000000000000000000000000000000000000001472caa9595ccba4ba00000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000d220df609462ed0e9ce688fc31e8253348a1e5e5000000000000000000000000000000000000000000000000000000006083145e0000000000000000000000000000000000000000000000000000000000000003000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000eeaa40b28a2d1b0b08f6f97bb1dd4b75316c6107	main
+failurereason is problematic
+
+
+New data write - accidentally deleted transactions database
+Create transactions_small, only the needed fields
+
+2022-03-13 incele
+2021-09-30 nonunique stuff
+
+problematic dates with 'dropreason'
+20240229
+20220730
+20230206
+
+
+15.04.2024
+for private transactions:
+first time when timepending field appeared = 2020-11-08
+first curblocknumber -> 11172686, at date 2020-11-01
+first gasused -> at date 2021-12-02
+last blocknumber -> 19499238
+
+zeromev first blocknumber and date -> 2021-10-05, 13358564
+
+interesting block with max user_swap: 19221038
+
+
+26.04.2024
+Mid Feb 2022 block number: 14212213
+June 2023 block number: 17387597
+
+the merge first block_number: 15540734 - so, last block number before merge is 15540733
+
