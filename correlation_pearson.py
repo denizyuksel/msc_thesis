@@ -7,21 +7,8 @@ from scipy.stats import pearsonr
 
 register_matplotlib_converters()
 
-localhost_name = 'localhost'
-db_params = {
-    'host': localhost_name,
-    'database': 'thesisdb',
-    'user': 'postgres',
-    'password': 'admin',
-    'port': '5432'
-}
-
-table_name = 'blocknative_zeromev'
-engine = create_engine(f"postgresql://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}")
-
-# SQL query to retrieve transactions data aggregated by date
-query = f"SELECT * FROM {table_name} ORDER BY block_date ASC"
-data = pd.read_sql(query, engine)
+# Read data from CSV file
+data = pd.read_csv('flashbots_blocknative.csv')
 
 # Convert 'block_date' to datetime format for plotting
 data['block_date'] = pd.to_datetime(data['block_date'])
@@ -31,14 +18,12 @@ aggregated_data = data.groupby('block_date').agg({
     'tx_count': 'mean',
     'private_tx_count': 'mean',
     'arb_count': 'mean',
-    'frontrun_count': 'mean',
     'sandwich_count': 'mean',
-    'backrun_count': 'mean',
     'liquid_count': 'mean'
 }).reset_index()
 
 # Calculate the average MEV transactions
-aggregated_data['mev_tx_count'] = aggregated_data[['arb_count', 'frontrun_count', 'sandwich_count', 'backrun_count', 'liquid_count']].mean(axis=1)
+aggregated_data['mev_tx_count'] = aggregated_data[['arb_count', 'liquid_count', 'sandwich_count']].mean(axis=1)
 
 # Calculate percentages of averages
 aggregated_data['private_tx_percentage'] = 100 * aggregated_data['private_tx_count'] / aggregated_data['tx_count']

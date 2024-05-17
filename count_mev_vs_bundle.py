@@ -22,47 +22,50 @@ aggregated_data = data.groupby('block_date').agg({
     'bundle_tx_count': 'sum'  # Aggregate the new column as well
 }).reset_index()
 
-aggregated_data['mev_tx_count'] = aggregated_data[['liquid_count', 'arb_count', 'sandwich_count']].sum(axis=1)
+aggregated_data['mev_tx_count'] = aggregated_data[['arb_count', 'liquid_count', 'sandwich_count']].sum(axis=1)
 
 # Apply a 14-day rolling average to the counts
 for col in ['arb_count', 'liquid_count', 'sandwich_count', 'bundle_tx_count', 'mev_tx_count', 'private_tx_count']:
     aggregated_data[col] = aggregated_data[col].rolling(window=14, min_periods=1).mean()
 
 # Calculate Pearson and Spearman correlation coefficients on the raw data
-pearson_corr, pearson_p_value = pearsonr(aggregated_data.dropna()['private_tx_count'], aggregated_data.dropna()['bundle_tx_count'])
-spearman_corr, spearman_p_value = spearmanr(aggregated_data.dropna()['private_tx_count'], aggregated_data.dropna()['bundle_tx_count'])
+pearson_corr, pearson_p_value = pearsonr(aggregated_data.dropna()['mev_tx_count'], aggregated_data.dropna()['bundle_tx_count'])
+spearman_corr, spearman_p_value = spearmanr(aggregated_data.dropna()['mev_tx_count'], aggregated_data.dropna()['bundle_tx_count'])
 
 # Plotting
 plt.figure(figsize=(8, 4))
 
-colors = ['magenta', 'skyblue', 'orange']
-labels = ['Liquid', 'Arb', 'Sandwich']
+colors = ['pink', 'skyblue']
+labels = ['Mev Tx Count', 'Bundle Count']
 
 # Start from 0 bottom, incrementally add the previous smoothed count
 bottom = pd.Series([0] * len(aggregated_data))
 
-for i, col in enumerate(['liquid_count', 'arb_count', 'sandwich_count']):
-    plt.fill_between(aggregated_data['block_date'], bottom, bottom + aggregated_data[col], color=colors[i], label=labels[i], step='mid', alpha=0.4)
-    bottom += aggregated_data[col]
+# for i, col in enumerate(['arb_count', 'liquid_count', 'sandwich_count']):
+for i, col in enumerate(['mev_tx_count', 'bundle_tx_count']):
+
+    # plt.fill_between(aggregated_data['block_date'], bottom, bottom + aggregated_data[col], color=colors[i], label=labels[i], step='mid', alpha=0.4)
+    # bottom += aggregated_data[col]
     
     # Uncomment to choose between plot and area chart.
-    # plt.plot(aggregated_data['block_date'], aggregated_data[col], color=colors[i], label=labels[i], linestyle='-', alpha=0.7)
+    plt.plot(aggregated_data['block_date'], aggregated_data[col], color=colors[i], label=labels[i], linestyle='-', alpha=0.7)
+
+# Adjust plot layout to make space at the bottom for annotations
+plt.subplots_adjust(bottom=0.2)
+
+# Annotate Pearson and Spearman correlation coefficients below the plot
+plt.figtext(0.1, 0.05, f'Pearson Corr (private vs bundle): {pearson_corr:.2f}, p-value: {pearson_p_value:.3f}', horizontalalignment='left', color='black', fontsize='x-small')
+plt.figtext(0.1, 0.02, f'Spearman Corr (private vs bundle): {spearman_corr:.2f}, p-value: {spearman_p_value:.3f}', horizontalalignment='left', color='black', fontsize='x-small')
 
 plt.title('Count of MEV Transactions and Flashbots Blocks Over Time (Pre-Merge)')
 plt.xlabel('Date')
-plt.ylabel('Count of MEV Transactions per Day')
+plt.ylabel('Count')
 
 # Set up the primary x-axis
 ax = plt.gca()
 ax.xaxis.set_major_locator(mdates.MonthLocator(interval=3))  # Adjust depending on the date range
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 plt.xticks(rotation=0)
-
-# Create a second y-axis for the new column
-ax2 = ax.twinx()
-ax2.plot(aggregated_data['block_date'], aggregated_data['bundle_tx_count'], color='blue', label='Flashbots Bundle Transactions', linestyle='-')  # Make line solid
-ax2.set_ylabel('Flashbots Bundle Count', color='blue')
-ax2.tick_params(axis='y', colors='blue')
 
 # Significant dates as vertical lines
 significant_dates = {
@@ -76,20 +79,11 @@ significant_dates = {
 for date, (color, linestyle, label) in significant_dates.items():
     ax.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
 
-# Adjust plot layout to make space at the bottom for annotations
-plt.subplots_adjust(bottom=0.45)
-
-# Annotate Pearson and Spearman correlation coefficients below the plot
-plt.figtext(0.1, 0.05, f'Pearson Corr (private vs bundle count): {pearson_corr:.2f}, p-value: {pearson_p_value:.3f}', horizontalalignment='left', color='black', fontsize='x-small')
-plt.figtext(0.1, 0.02, f'Spearman Corr (private vs bundle count): {spearman_corr:.2f}, p-value: {spearman_p_value:.3f}', horizontalalignment='left', color='black', fontsize='x-small')
-
-# Combine legends from both axes and improve legend placement
 lines, labels = ax.get_legend_handles_labels()
-lines2, labels2 = ax2.get_legend_handles_labels()
-legend = ax.legend(lines + lines2, labels + labels2, loc='upper right', fontsize='x-small', framealpha=1)
-legend.set_zorder(100)  # Set a high z-order to ensure it's on top
+legend = ax.legend(lines, labels, loc='upper right', fontsize='x-small')
+legend.set_zorder(5)  # Set a high zorder to ensure the legend is on top of the grid
 
 plt.grid(True)
 plt.tight_layout()
-plt.savefig('figures/count_mev_types_vs_flashbots_private.png')
+plt.savefig('figures/count_mev_vs_bundle.png')
 # plt.show()  # Uncomment to display the plot directly

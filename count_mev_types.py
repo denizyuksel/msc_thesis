@@ -1,5 +1,4 @@
 import pandas as pd
-from sqlalchemy import create_engine
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from pandas.plotting import register_matplotlib_converters
@@ -51,17 +50,16 @@ ax = plt.gca()
 ax.xaxis.set_major_locator(mdates.MonthLocator(interval=4))  # Adjust depending on the date range
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
-fb_launch_date = '2021-10-06'
-the_merge = '2022-09-15'
-ftx_collapse = '2022-11-11'
-usdc_depeg = '2023-03-11'
-mev_blocker_launch_date = '2023-04-27'
-# Dashed lines for the specified dates
-ax.axvline(pd.Timestamp(fb_launch_date), color='darkred', linestyle='--', linewidth=2, label='Flashbots Protect Launch Date (Oct 2021)')
-ax.axvline(pd.Timestamp(the_merge), color='red', linestyle='-.', linewidth=2, label='The Merge (Sept 2022)')
-ax.axvline(pd.Timestamp(ftx_collapse), color='deepskyblue', linestyle=':', linewidth=2, label='FTX Collapse Date (Nov 2022)')
-ax.axvline(pd.Timestamp(usdc_depeg), color='fuchsia', linestyle='--', linewidth=2, label='USDC Depeg Date (Mar 2023)')
-ax.axvline(pd.Timestamp(mev_blocker_launch_date), color='indigo', linestyle='-.', linewidth=2, label='MEV Blocker Launch Date (Apr 2023)')
+# Significant dates as vertical lines
+significant_dates = {
+    '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch Date (Oct 2021)'),
+    '2022-09-15': ('red', '-.', 'The Merge (Sept 2022)'),
+    '2022-11-11': ('deepskyblue', ':', 'FTX Collapse Date (Nov 2022)'),
+    '2023-03-11': ('fuchsia', '--', 'USDC Depeg Date (Mar 2023)'),
+    '2023-04-27': ('indigo', '-.', 'MEV Blocker Launch Date (Apr 2023)')
+}
+for date, (color, linestyle, label) in significant_dates.items():
+    ax.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
 
 plt.grid(True)
 plt.xticks(rotation=45)

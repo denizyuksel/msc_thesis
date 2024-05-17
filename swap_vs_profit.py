@@ -1,5 +1,4 @@
 import pandas as pd
-from sqlalchemy import create_engine
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from pandas.plotting import register_matplotlib_converters
@@ -7,24 +6,15 @@ from scipy.stats import pearsonr, spearmanr
 
 register_matplotlib_converters()
 
-localhost_name = 'localhost'
-db_params = {
-    'host': localhost_name,
-    'database': 'thesisdb',
-    'user': 'postgres',
-    'password': 'admin',
-    'port': '5432'
-}
-
-table_name = 'blocknative_zeromev'
-engine = create_engine(f"postgresql://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}")
-
-# SQL query to retrieve transactions data aggregated by date
-query = f"SELECT * FROM {table_name} ORDER BY block_date ASC"
-data = pd.read_sql(query, engine)
+# Read data from CSV file
+data = pd.read_csv('flashbots_blocknative.csv')
 
 # Convert 'block_date' to datetime format for plotting
 data['block_date'] = pd.to_datetime(data['block_date'])
+
+# Exclude null values before processing
+data = data.dropna(subset=['total_user_swap_volume'])
+data = data.dropna(subset=['total_extractor_profit'])
 
 # Aggregate data by date
 aggregated_data = data.groupby('block_date').agg({
@@ -33,40 +23,39 @@ aggregated_data = data.groupby('block_date').agg({
 }).reset_index()
 
 # Apply a 7-day rolling window to smooth the data
-aggregated_data['smoothed_user_swap_volume'] = aggregated_data['total_user_swap_volume'].rolling(window=1, center=True).mean()
-aggregated_data['smoothed_extractor_profit'] = aggregated_data['total_extractor_profit'].rolling(window=1, center=True).mean()
+aggregated_data['total_user_swap_volume'] = aggregated_data['total_user_swap_volume'].rolling(window=14, center=True).mean()
+aggregated_data['total_extractor_profit'] = aggregated_data['total_extractor_profit'].rolling(window=14, center=True).mean()
 
 # Calculate Pearson and Spearman correlation coefficients on the smoothed data
-pearson_corr, pearson_p_value = pearsonr(aggregated_data.dropna()['smoothed_user_swap_volume'], aggregated_data.dropna()['smoothed_extractor_profit'])
-spearman_corr, spearman_p_value = spearmanr(aggregated_data.dropna()['smoothed_user_swap_volume'], aggregated_data.dropna()['smoothed_extractor_profit'])
+pearson_corr, pearson_p_value = pearsonr(aggregated_data.dropna()['total_user_swap_volume'], aggregated_data.dropna()['total_extractor_profit'])
+spearman_corr, spearman_p_value = spearmanr(aggregated_data.dropna()['total_user_swap_volume'], aggregated_data.dropna()['total_extractor_profit'])
 
 # Plotting
 fig, ax = plt.subplots(figsize=(8, 4))
 ax.set_yscale('log')  # Setting the y-axis to logarithmic scale
 
-plt.title('Daily Total User Swap Volume and Extractor Profit (No Rolling Window)')
+plt.title('Daily Total User Swap Volume and Extractor Profit')
 
 ax.set_yscale('symlog', linthresh=1)  # Setting a linear threshold around zero
 
 
 # Plot for smoothed total user swap volume and total extractor profit
-ax.plot(aggregated_data['block_date'], aggregated_data['smoothed_user_swap_volume'], color='cyan', label='Total User Swap Volume (USD)')
-ax.plot(aggregated_data['block_date'], aggregated_data['smoothed_extractor_profit'], color='magenta', label='Total Extractor Profit (USD)')
+ax.plot(aggregated_data['block_date'], aggregated_data['total_user_swap_volume'], color='cyan', label='Total User Swap Volume (USD)')
+ax.plot(aggregated_data['block_date'], aggregated_data['total_extractor_profit'], color='magenta', label='Total Extractor Profit (USD)')
 ax.set_xlabel('Date')
 ax.set_ylabel('Amount (USD - Log Scale)')
 
-# Important dates
-fb_launch_date = '2021-10-06'
-the_merge = '2022-09-15'
-ftx_collapse = '2022-11-11'
-usdc_depeg = '2023-03-11'
-mev_blocker_launch_date = '2023-04-27'
-# Dashed lines for the specified dates
-ax.axvline(pd.Timestamp(fb_launch_date), color='darkred', linestyle='--', linewidth=2, label='Flashbots Protect Launch Date (Oct 2021)')
-ax.axvline(pd.Timestamp(the_merge), color='red', linestyle='-.', linewidth=2, label='The Merge (Sept 2022)')
-ax.axvline(pd.Timestamp(ftx_collapse), color='deepskyblue', linestyle=':', linewidth=2, label='FTX Collapse Date (Nov 2022)')
-ax.axvline(pd.Timestamp(usdc_depeg), color='fuchsia', linestyle='--', linewidth=2, label='USDC Depeg Date (Mar 2023)')
-ax.axvline(pd.Timestamp(mev_blocker_launch_date), color='indigo', linestyle='-.', linewidth=2, label='MEV Blocker Launch Date (Apr 2023)')
+# Significant dates as vertical lines (ensure these are defined correctly)
+significant_dates = {
+    '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch Date (Oct 2021)'),
+    # Uncomment below for full data (after merge)
+    '2022-09-15': ('red', '-.', 'The Merge (Sept 2022)'),
+    '2022-11-11': ('deepskyblue', ':', 'FTX Collapse Date (Nov 2022)'),
+    '2023-03-11': ('fuchsia', '--', 'USDC Depeg Date (Mar 2023)'),
+    '2023-04-27': ('indigo', '-.', 'MEV Blocker Launch Date (Apr 2023)')
+}
+for date, (color, linestyle, label) in significant_dates.items():
+    ax.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
 
 # Annotate Pearson and Spearman correlation coefficients in the top right
 ax.annotate(f'Pearson Corr: {pearson_corr:.2f}, p-value: {pearson_p_value:.3f}', xy=(1, 1), xycoords='axes fraction', verticalalignment='top', horizontalalignment='right', color='black')
@@ -82,5 +71,5 @@ ax.set_xticklabels(labels, rotation=45, ha='center')
 fig.tight_layout()
 plt.grid(True)
 ax.legend(loc="upper left", bbox_to_anchor=(0,1), bbox_transform=ax.transAxes)
-plt.savefig('figures/swap_vs_profit_1_window.png')
+plt.savefig('figures/swap_vs_profit.png')
 # plt.show()
