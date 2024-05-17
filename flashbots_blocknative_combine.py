@@ -15,7 +15,7 @@ db_params = {
 engine = create_engine(f"postgresql://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}")
 
 # SQL query to retrieve transactions data aggregated by date
-table_name = 'blocknative_zeromev'
+table_name = 'blocknative_zeromev_rq4'
 query = f"SELECT * FROM {table_name} ORDER BY block_number ASC"
 data = pd.read_sql(query, engine)
 
@@ -23,7 +23,8 @@ data = pd.read_sql(query, engine)
 data['block_date'] = pd.to_datetime(data['block_date'])
 
 # File path for flashbots csv
-file_path = 'output.csv'
+file_path = 'data/output.csv'
+final_csv_path = 'data/blocknative_zeromev_flashbots_rq4.csv'
 
 def find_max_min_block_number_and_df(file_path, column_name='block_number', chunk_size=500000):
     max_value = -float('inf')  # Initialize to negative infinity for maximum
@@ -75,7 +76,7 @@ print("AFTER JOIN")
 # Now you can use `combined_data` for further analysis or plotting
 print(combined_data.head())
 # Write the combined DataFrame to a CSV file
-combined_data.to_csv('flashbots_blocknative_all.csv', index=False)
+combined_data.to_csv(final_csv_path, index=False)
 
 # Confirmation message
-print("Data has been successfully written to 'flashbots_blocknative.csv'")
+print(f"Data has been successfully written to {final_csv_path}")

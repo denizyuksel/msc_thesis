@@ -9,7 +9,7 @@ log_directory = "logs"
 if not os.path.exists(log_directory):
     os.makedirs(log_directory)
 
-log_file_path = os.path.join(log_directory, "combine_blocknative_zeromev.log")
+log_file_path = os.path.join(log_directory, "combine_blocknative_zeromev_RQ4.log")
 logging.basicConfig(level=logging.INFO, filename=log_file_path, filemode='a',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -23,7 +23,8 @@ db_params = {
     'port': '5432'
 }
 
-table_name = 'blocknative_zeromev'
+table_name = 'blocknative_zeromev_rq4'
+blocknative_blocks_rq4_table_name = 'blocknative_blocks_rq4'
 engine = create_engine(f"postgresql://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}")
 
 metadata = MetaData()
@@ -33,14 +34,32 @@ table = Table(table_name, metadata,
     
     # columns from aggregated blocknative data
     Column('block_date', VARCHAR(100), index=True),
+    
     Column('tx_count', INTEGER),
     Column('private_tx_count', INTEGER),
     Column('public_tx_count', INTEGER),
-    Column('gasused_gwei', NUMERIC),
+    
+    # Gasused Impact
+    # Column('gasused_gwei', NUMERIC),
     Column('private_gasused_gwei', NUMERIC),
     Column('public_gasused_gwei', NUMERIC),
     
-    # columns from aggregated zeromev data
+    Column('private_mean_gasused', NUMERIC),
+    Column('private_median_gasused', NUMERIC),
+                    
+    Column('public_mean_gasused', NUMERIC),
+    Column('public_median_gasused', NUMERIC),
+    
+    # Gas Price Impact
+    Column('mean_gasprice_gwei', NUMERIC),
+    Column('median_gasprice_gwei', NUMERIC),
+    
+    # Inclusion Time Impact
+    Column('timepending_block_total', BIGINT),
+    Column('mean_timepending', BIGINT),
+    Column('median_timepending', BIGINT),
+    
+    # Columns from aggregated zeromev data
     Column('total_user_swap_volume', NUMERIC),
     Column('total_extractor_profit', NUMERIC),
     
@@ -81,12 +100,11 @@ metadata.create_all(engine)
 logging.info(f"Table {table_name} has been created/ensured in the database")
 
 # Load the data from the database into Pandas DataFrames
-blocknative_blocks_df = pd.read_sql('SELECT * FROM blocknative_blocks', con=engine)
+blocknative_blocks_df = pd.read_sql(f'SELECT * FROM {blocknative_blocks_rq4_table_name}', con=engine)
 logging.info(f"Blocknative table read!")
 
 zeromev_data_df = pd.read_sql('SELECT * FROM zeromev_data', con=engine)
 logging.info(f"Zeromev table read!")
-
 
 # Perform a left join using Pandas, focusing on blocknative_blocks_df
 joined_df = pd.merge(blocknative_blocks_df, zeromev_data_df, on='block_number', how='left')
