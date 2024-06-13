@@ -4,3 +4,4 @@ thesis_env/*
 logs/*
 saved_logs/*
 thesis_env_mac/*
+protect_historical.csv
