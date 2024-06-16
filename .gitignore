@@ -5,3 +5,5 @@ logs/*
 saved_logs/*
 thesis_env_mac/*
 protect_historical.csv
+blocknative_zeromev_flashbots_rq4.csv
+final_data_backup.csv
