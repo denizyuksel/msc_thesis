@@ -3,3 +3,6 @@ db_data/*
 thesis_env/*
 logs/*
 saved_logs/*
+.DS_Store
+protect_historical.csv
+thesis_env_mac/
