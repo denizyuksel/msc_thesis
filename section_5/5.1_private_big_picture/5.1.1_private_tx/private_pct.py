@@ -12,8 +12,8 @@ def load_and_prepare_data(filepath):
 
 def aggregate_data(data):
     data_by_date = data.groupby('block_date').agg({
-        'private_tx_pct' : 'mean',
-        'private_gasused_pct' : 'mean',
+        'private_tx_pct' : 'median',
+        'private_gasused_pct' : 'median',
     }).reset_index()
     data_by_date['private_tx_pct'] = data_by_date['private_tx_pct'].rolling(window=14).mean()
     data_by_date['private_gasused_pct'] = data_by_date['private_gasused_pct'].rolling(window=14).mean()
@@ -26,7 +26,7 @@ def plot_data(data_by_date, filepath):
     plt.title('Private Transaction Rates Detected by Blocknative Over Time')
     plt.xlabel('Date')
     plt.ylabel('Percentage')
-    plt.xlim(left=data_by_date['block_date'].min())
+    plt.xlim(left=data_by_date['block_date'].min() - pd.Timedelta(days=1), right=data_by_date['block_date'].max() + pd.Timedelta(days=1))
     plt.ylim(0)
 
     ax = plt.gca()
@@ -58,7 +58,7 @@ def calculate_correlation(data):
 def main():
     data = load_and_prepare_data('../../../final_data.csv')
     data_by_date = aggregate_data(data)
-    plot_data(data_by_date, '5_private_tx_overview.png')
+    plot_data(data_by_date, '5_private_tx_overview_median.png')
     pearson, pearson_p, spearman, spearman_p = calculate_correlation(data_by_date)
     print(f"Pearson correlation and p value: {pearson}, {pearson_p}")
     print(f"Spearman correlation and p value: {spearman}, {spearman_p}")

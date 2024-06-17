@@ -43,7 +43,7 @@ def plot_data(data, filepath):
     plt.title('MEV Transactions Percentages Over Time')
     plt.xlabel('Date')
     plt.ylabel('Percentage')
-    plt.xlim(left=data['block_date'].min())
+    plt.xlim(left=data['block_date'].min(), right=data['block_date'].max())
     plt.ylim(0, 100)
 
     ax = plt.gca()
@@ -69,7 +69,7 @@ def plot_data(data, filepath):
 def main():
     data = load_and_prepare_data('../../../final_data.csv')
     data_by_date = aggregate_data(data)
-    plot_data(data_by_date, '5_mev_types.png')
+    plot_data(data_by_date, '5.2.1_mev_types.png')
 
 if __name__ == "__main__":
     main()
