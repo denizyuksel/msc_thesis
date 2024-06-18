@@ -82,8 +82,8 @@ def find_highest_correlation(data):
         # Filter data for the current date range
         filtered_data = data[(data['block_date'] >= start_date) & (data['block_date'] <= current_date)]
         if not filtered_data.dropna().empty:
-            pearson_corr, _ = pearsonr(filtered_data.dropna()['private_tx_count'], filtered_data.dropna()['fb_bundle_count'])
-            spearman_corr, _ = spearmanr(filtered_data.dropna()['private_tx_count'], filtered_data.dropna()['fb_bundle_count'])
+            pearson_corr, _ = pearsonr(filtered_data.dropna()['private_tx_count'], filtered_data.dropna()['median_gasprice_gwei'])
+            spearman_corr, _ = spearmanr(filtered_data.dropna()['private_tx_count'], filtered_data.dropna()['median_gasprice_gwei'])
 
             # Store the results with their corresponding date
             pearson_results.append((pearson_corr, current_date.strftime('%Y-%m-%d')))
@@ -100,8 +100,8 @@ def find_highest_correlation(data):
 def calculate_correlation(data):
     # Calculate Pearson and Spearman correlation coefficients on the data
     portion_data = data[(data['block_date'] >= pd.Timestamp('2021-10-06')) & (data['block_date'] <= pd.Timestamp('2022-05-03'))]
-    pearson_corr, pearson_p_value = pearsonr(portion_data.dropna()['private_tx_count'], portion_data.dropna()['fb_bundle_count'])
-    spearman_corr, spearman_p_value = spearmanr(portion_data.dropna()['private_tx_count'], portion_data.dropna()['fb_bundle_count'])
+    pearson_corr, pearson_p_value = pearsonr(portion_data.dropna()['private_tx_count'], portion_data.dropna()['median_gasprice_gwei'])
+    spearman_corr, spearman_p_value = spearmanr(portion_data.dropna()['private_tx_count'], portion_data.dropna()['median_gasprice_gwei'])
     return pearson_corr, pearson_p_value, spearman_corr, spearman_p_value
 
 def main():

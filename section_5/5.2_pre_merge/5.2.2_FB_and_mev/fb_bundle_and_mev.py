@@ -20,10 +20,10 @@ def aggregate_data(data):
     'liquid_count': 'sum',
     'sandwich_count': 'sum',
     'mev_tx_count': 'sum',
-    'fb_bundle_count' : 'sum',
+    'flashbots_bundle_count' : 'sum',
     }).reset_index()
     # Apply a 14-day rolling average to the raw counts.
-    cols_to_smooth = ['arb_count', 'liquid_count', 'sandwich_count', 'mev_tx_count', 'fb_bundle_count']
+    cols_to_smooth = ['arb_count', 'liquid_count', 'sandwich_count', 'mev_tx_count', 'flashbots_bundle_count']
     for col in cols_to_smooth:
         aggregated_data[col] = aggregated_data[col].rolling(window=14, min_periods=1).mean()
     for col in ['arb_count', 'liquid_count', 'sandwich_count']:
@@ -45,7 +45,7 @@ def plot_data(data, filepath):
         bottom += data[col]
         poly_collections.append(poly)
 
-    line2, = ax2.plot(data['block_date'], data['fb_bundle_count'], linestyle='-', color='navy', label='Flashbots Bundles')
+    line2, = ax2.plot(data['block_date'], data['flashbots_bundle_count'], linestyle='-', color='navy', label='Flashbots Bundles')
 
     significant_dates = {
         '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch Date (Oct 2021)'),

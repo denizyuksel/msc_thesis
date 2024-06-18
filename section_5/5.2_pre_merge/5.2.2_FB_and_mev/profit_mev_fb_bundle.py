@@ -11,11 +11,11 @@ def load_and_prepare_data(filepath):
 
 def aggregate_data(data):
     data_by_date = data.groupby('block_date').agg({
-        'fb_bundle_count' : 'sum',
+        'flashbots_bundle_count' : 'sum',
         'mev_tx_count': 'sum',
         'total_extractor_profit': 'sum',
     }).reset_index()
-    data_by_date['fb_bundle_count'] = data_by_date['fb_bundle_count'].rolling(window=14).mean()
+    data_by_date['flashbots_bundle_count'] = data_by_date['flashbots_bundle_count'].rolling(window=14).mean()
     data_by_date['mev_tx_count'] = data_by_date['mev_tx_count'].rolling(window=14).mean()
     data_by_date['total_extractor_profit'] = data_by_date['total_extractor_profit'].rolling(window=14).mean()
     return data_by_date
@@ -26,13 +26,14 @@ def plot_data(data, filepath):
     color = 'tab:blue'
     ax1.set_xlabel('Date')
     ax1.set_ylabel('Count')
-    ax1.plot(data['block_date'], data['fb_bundle_count'], color='blue', label='Flashbots Bundles per Block')
+    ax1.plot(data['block_date'], data['flashbots_bundle_count'], color='blue', label='Flashbots Bundles per Block')
     ax1.plot(data['block_date'], data['mev_tx_count'], color='darkorange', label='MEV Transactions')
     
     ax2 = ax1.twinx()  # Instantiate a second axes that shares the same x-axis
     color = 'limegreen'
-    ax2.set_ylabel('Profit (USD)', color=color)
-    ax2.plot(data['block_date'], data['total_extractor_profit'], color=color, label='Total Extractor Profit')
+    ax2.set_ylabel('Profit (USD)', color="green")
+    ax2.tick_params(axis='y', labelcolor='green') # Modified line
+    ax2.plot(data['block_date'], data['total_extractor_profit'], color=color, linestyle='--', label='Total Extractor Profit')
     
     plt.setp(ax1.get_xticklabels(), rotation=45, ha="center")
     plt.setp(ax2.get_xticklabels(), rotation=45, ha="center")
@@ -70,8 +71,8 @@ def plot_data(data, filepath):
 
 def calculate_correlation(data):
     # Calculate Pearson and Spearman correlation coefficients on the raw data
-    pearson_corr, pearson_p_value = pearsonr(data.dropna()['fb_bundle_count'], data.dropna()['mev_tx_count'])
-    spearman_corr, spearman_p_value = spearmanr(data.dropna()['fb_bundle_count'], data.dropna()['mev_tx_count'])
+    pearson_corr, pearson_p_value = pearsonr(data.dropna()['flashbots_bundle_count'], data.dropna()['mev_tx_count'])
+    spearman_corr, spearman_p_value = spearmanr(data.dropna()['flashbots_bundle_count'], data.dropna()['mev_tx_count'])
     return pearson_corr, pearson_p_value, spearman_corr, spearman_p_value
 
 def main():
