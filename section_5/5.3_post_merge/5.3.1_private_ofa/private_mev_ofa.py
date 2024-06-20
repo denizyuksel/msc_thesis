@@ -111,7 +111,7 @@ def plot_data_single_axis(data_by_date, mev_share_data, filepath):
 def main():
     data = load_and_prepare_data('../../../final_data.csv')
     mev_share_data = load_and_prepare_data('../../../mevshare_by_date.csv')
-    mev_blocker_data = load_and_prepare_data('../../../mevblocker_hour_18.csv')
+    mev_blocker_data = load_and_prepare_data('../../../mevblocker_deniz_18_distinct.csv')
     data_by_date = aggregate_data(data)
     plot_data_double_axis(data_by_date, mev_share_data, mev_blocker_data, '5.3.1_private_ofa.png')
 

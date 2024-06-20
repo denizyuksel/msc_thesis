@@ -16,4 +16,4 @@ dune = DuneClient(
 query_result = dune.get_latest_result_dataframe(config.hourly_query_id) # get latest result in Pandas dataframe format
 
 print(f"QUERY RESULT 1: {query_result}")
-query_result.to_csv('mevblocker_burak_18.csv', index=False)
+query_result.to_csv('mevblocker_deniz_18_distinct.csv', index=False)
