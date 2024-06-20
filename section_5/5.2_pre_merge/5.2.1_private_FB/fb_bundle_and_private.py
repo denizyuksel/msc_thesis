@@ -13,11 +13,65 @@ def load_and_prepare_data(filepath):
 def aggregate_data(data):
     data_by_date = data.groupby('block_date').agg({
         'private_tx_count' : 'sum',
+        'private_tx_pct': 'mean',
         'flashbots_bundle_count' : 'sum',
     }).reset_index()
     data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14).mean()
+    data_by_date['private_tx_pct'] = data_by_date['private_tx_pct'].rolling(window=14).mean()
     data_by_date['flashbots_bundle_count'] = data_by_date['flashbots_bundle_count'].rolling(window=14).mean()
     return data_by_date
+
+def plot_data_double_axis(data, filepath):
+    fig, ax1 = plt.subplots()
+
+    color = 'navy'
+    ax1.set_xlabel('Date')
+    ax1.set_ylabel('Percentage', color=color)
+    ax1.plot(data['block_date'], data['private_tx_pct'], color=color, label='Private Transactions')
+    ax1.tick_params(axis='y', labelcolor=color)
+    
+    ax2 = ax1.twinx()  # Instantiate a second axes that shares the same x-axis
+    color = 'limegreen'
+    ax2.set_ylabel('Count', color='green')
+    ax2.plot(data['block_date'], data['flashbots_bundle_count'], linestyle='-', color=color, label='Flashbots Bundles')
+    ax2.tick_params(axis='y', labelcolor='green')
+    ax2.tick_params(axis='x', colors=color)
+
+    plt.setp(ax1.get_xticklabels(), rotation=45, ha="center")
+    plt.setp(ax2.get_xticklabels(), rotation=45, ha="center")
+
+    plt.title('Private Transactions and Flashbots Bundles')
+    ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    ax1.set_xlim(left=data['block_date'].min(), right=data['block_date'].max())
+
+    ax1.set_ylim(0, 10)
+    ax2.set_ylim(0)
+
+    significant_dates = {
+        '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch'),
+    }
+    for date, (color, linestyle, label) in significant_dates.items():
+        ax1.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
+
+    fig.tight_layout()  # Adjust layout to make room for the legend
+
+    # Collect all the legend handles and labels
+    handles, labels = [], []
+    for ax in [ax1, ax2]:
+        for handle, label in zip(*ax.get_legend_handles_labels()):
+            handles.append(handle)
+            labels.append(label)
+    ax1.legend(handles, labels, loc='upper left')
+
+    # Combine lines and labels for the legend
+    leg = plt.legend(handles, labels, loc='upper left', frameon=True)
+    leg.set_zorder(100)  # Ensure legend is on top
+
+    plt.grid(True)
+    # Move the rotation setting to the very end after all plotting
+    plt.setp(ax1.get_xticklabels(), rotation=45)
+    plt.savefig(filepath)
 
 def plot_data(data, filepath):
     fig, ax1 = plt.subplots()
@@ -95,7 +149,8 @@ def calculate_correlation(data):
 def main():
     data = load_and_prepare_data('../../../final_data.csv')
     data_by_date = aggregate_data(data)
-    plot_data(data_by_date, '5.2.1_private_vs_FB.png')
+    # plot_data(data_by_date, '5.2.1_private_vs_FB.png')
+    plot_data_double_axis(data_by_date, '5.2.1_private_vs_FB.png')
     
     pearson, pearson_p, spearman, spearman_p = calculate_correlation(data_by_date)
     print(f"Pearson correlation: {pearson}, p value: {pearson_p}")

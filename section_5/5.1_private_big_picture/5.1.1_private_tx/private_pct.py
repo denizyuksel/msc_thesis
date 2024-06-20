@@ -34,11 +34,11 @@ def plot_data(data_by_date, filepath):
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
     significant_dates = {
-        '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch Date (Oct 2021)'),
-        '2022-09-15': ('red', '-.', 'The Merge (Sept 2022)'),
-        '2022-11-11': ('deepskyblue', ':', 'FTX Collapse Date (Nov 2022)'),
-        '2023-03-11': ('fuchsia', '--', 'USDC Depeg Date (Mar 2023)'),
-        '2023-04-27': ('orange', '-.', 'MEV Blocker Launch Date (Apr 2023)')
+        '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch'),
+        '2022-09-15': ('red', '-.', 'The Merge'),
+        '2022-11-11': ('deepskyblue', ':', 'FTX Collapse'),
+        '2023-03-11': ('fuchsia', '--', 'USDC Depeg'),
+        '2023-04-27': ('orange', '-.', 'MEV Blocker Launch')
     }
     for date, (color, linestyle, label) in significant_dates.items():
         ax.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
@@ -58,7 +58,7 @@ def calculate_correlation(data):
 def main():
     data = load_and_prepare_data('../../../final_data.csv')
     data_by_date = aggregate_data(data)
-    plot_data(data_by_date, '5_private_tx_overview_median.png')
+    plot_data(data_by_date, '5.1.1_private_tx_overview.png')
     pearson, pearson_p, spearman, spearman_p = calculate_correlation(data_by_date)
     print(f"Pearson correlation and p value: {pearson}, {pearson_p}")
     print(f"Spearman correlation and p value: {spearman}, {spearman_p}")

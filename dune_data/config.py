@@ -1,0 +1,7 @@
+dune_api_key='zUmJ91VZtloDEvQ2JofedzzfaD1iDM16'
+new_account_api_key='GrHbBvlhsnv6xaTXdTNimHHIn9ybURCp'
+request_timeout=3000
+query_id=3675971
+query_id_burak=3848216
+query_new_account=3848632
+hourly_query_id=3848741
