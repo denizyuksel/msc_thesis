@@ -14,8 +14,10 @@ def aggregate_data(data):
     data_by_date = data.groupby('block_date').agg({
         'private_tx_count' : 'sum',
         'median_gasprice_gwei' : 'median',
+        'private_gasused_pct' : 'median',
     }).reset_index()
     data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14).mean()
+    data_by_date['private_gasused_pct'] = data_by_date['private_gasused_pct'].rolling(window=14).mean()
     data_by_date['median_gasprice_gwei'] = data_by_date['median_gasprice_gwei'].rolling(window=14).mean()
     return data_by_date
 
@@ -23,11 +25,11 @@ def plot_data(data, filepath):
     fig, ax1 = plt.subplots()
 
     ax2 = ax1.twinx()
-    line1, = ax1.plot(data['block_date'], data['private_tx_count'], linestyle='-', color='blue', label='Blocknative Private Transactions')
-    line2, = ax2.plot(data['block_date'], data['median_gasprice_gwei'], linestyle='-', color='orange', label='Block Level Median Gas Price')
+    line1, = ax1.plot(data['block_date'], data['private_gasused_pct'], linestyle='-', color='blue', label='Private O.F. Gas Used')
+    line2, = ax2.plot(data['block_date'], data['median_gasprice_gwei'], linestyle='-', color='orange', label='Gas Price')
 
     ax1.set_xlabel('Date')
-    ax1.set_ylabel('Count', color='blue')
+    ax1.set_ylabel('Percentage', color='blue')
     ax2.set_ylabel('Gas Price (Gwei)', color='darkorange')
 
     ax1.tick_params(axis='y', labelcolor='blue')
@@ -46,11 +48,11 @@ def plot_data(data, filepath):
     plt.setp(ax2.get_xticklabels(), rotation=45, ha="center")
 
     significant_dates = {
-        '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch Date (Oct 2021)'),
-        '2022-09-15': ('red', '-.', 'The Merge (Sept 2022)'),
-        '2022-11-11': ('deepskyblue', ':', 'FTX Collapse Date (Nov 2022)'),
-        '2023-03-11': ('limegreen', '--', 'USDC Depeg Date (Mar 2023)'),
-        '2023-04-27': ('green', '-.', 'MEV Blocker Launch Date (Apr 2023)')
+        '2021-10-06': ('darkred', '--', 'Flashbots Protect'),
+        '2022-09-15': ('red', '-.', 'The Merge'),
+        '2022-11-11': ('deepskyblue', ':', 'FTX Collapse'),
+        '2023-03-11': ('limegreen', '--', 'USDC Depeg'),
+        '2023-04-27': ('green', '-.', 'OFAs')
     }
     lines = []
     labels = []

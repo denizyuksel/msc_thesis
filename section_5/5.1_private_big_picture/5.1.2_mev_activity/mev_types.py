@@ -6,9 +6,6 @@ import numpy as np
 def load_and_prepare_data(filepath):
     data = pd.read_csv(filepath)
     data['block_date'] = pd.to_datetime(data['block_date'])
-    # filtered_data = data[(data['block_date'] >= pd.Timestamp('2020-12-01')) & 
-    #                      (data['block_date'] <= pd.Timestamp('2024-04-01'))]
-
     data['arb_pct'] = np.where(data['mev_tx_count'] == 0, 0, (data['arb_count'] / data['mev_tx_count']) * 100)
     data['sandwich_pct'] = np.where(data['mev_tx_count'] == 0, 0, (data['sandwich_count'] / data['mev_tx_count']) * 100)
     data['liquid_pct'] = np.where(data['mev_tx_count'] == 0, 0, (data['liquid_count'] / data['mev_tx_count']) * 100)
@@ -22,29 +19,22 @@ def aggregate_data(data):
     'mev_tx_count': 'sum'
     }).reset_index()
     # Apply a 14-day rolling average to the raw counts.
-    cols_to_smooth = ['arb_count', 'liquid_count', 'sandwich_count', 'mev_tx_count']
-    for col in cols_to_smooth:
-        aggregated_data[col] = aggregated_data[col].rolling(window=14, min_periods=1).mean()
-    for col in ['arb_count', 'liquid_count', 'sandwich_count']:
-        aggregated_data[f'{col}_pct'] = (aggregated_data[col] / aggregated_data['mev_tx_count']) * 100
+    aggregated_data["arb_count"] = aggregated_data["arb_count"].rolling(window=14, min_periods=1).mean()
+    # aggregated_data["liquid_count"] = aggregated_data["liquid_count"].rolling(window=3, min_periods=1).median()
+    aggregated_data["sandwich_count"] = aggregated_data["sandwich_count"].rolling(window=14, min_periods=1).mean()
+
     return aggregated_data
 
 def plot_data(data, filepath):
-    colors = ['skyblue', 'magenta', 'orange']
-    labels = ['Arb', 'Liquid', 'Sandwich']
-
-    # Start from 0 bottom, incrementally add the previous smoothed count
-    bottom = np.zeros(len(data))
-    for i, col in enumerate(['arb_count_pct', 'liquid_count_pct', 'sandwich_count_pct']):
-        plt.fill_between(data['block_date'], bottom, bottom + data[col], color=colors[i], label=labels[i], step='mid', alpha=0.4)
-        bottom += data[col]
-    # plt.plot(data['block_date'], data['private_tx_pct'], linestyle='-', color='navy', label='Blocknative Private Transactions')
-
-    plt.title('MEV Transactions Percentages Over Time')
+    plt.title('MEV Activity With Categories Over Time')
     plt.xlabel('Date')
-    plt.ylabel('Percentage')
+    plt.ylabel('Count')
     plt.xlim(left=data['block_date'].min(), right=data['block_date'].max())
-    plt.ylim(0, 100)
+    # plt.ylim(0)
+
+    plt.plot(data['block_date'], data['arb_count'], color='cyan', label='Arbitrage')
+    plt.plot(data['block_date'], data['sandwich_count'], linestyle='-', color='darkorange', label='Sandwich')
+    plt.plot(data['block_date'], data['liquid_count'], color='green', label='Liquidation')
 
     ax = plt.gca()
     ax.xaxis.set_major_locator(mdates.MonthLocator(interval=4))
@@ -62,7 +52,7 @@ def plot_data(data, filepath):
 
     plt.grid(True)
     plt.xticks(rotation=45)
-    plt.legend(loc='lower left')
+    plt.legend(loc='upper left')
     plt.tight_layout()
     plt.savefig(filepath)
 

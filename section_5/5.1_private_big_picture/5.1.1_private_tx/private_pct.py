@@ -20,10 +20,13 @@ def aggregate_data(data):
     return data_by_date
 
 def plot_data(data_by_date, filepath):
-    plt.plot(data_by_date['block_date'], data_by_date['private_tx_pct'], linestyle='-', color='blue', label='Count per Block')
-    plt.plot(data_by_date['block_date'], data_by_date['private_gasused_pct'], linestyle='-', color='green', label='Gas Occupation per Block Space')
+    plt.plot(data_by_date['block_date'], data_by_date['private_tx_pct'], linestyle='-', color='blue', label='Transaction Count')
+    plt.plot(data_by_date['block_date'], data_by_date['private_gasused_pct'], linestyle='-', color='green', label='Gas Usage')
 
-    plt.title('Private Transaction Rates Detected by Blocknative Over Time')
+    # Fill with cyan
+    plt.fill_between(data_by_date['block_date'], data_by_date['private_tx_pct'], data_by_date['private_gasused_pct'], color='aqua', alpha=0.2)
+
+    plt.title('Evolution of Private Transaction Flow Over Time')
     plt.xlabel('Date')
     plt.ylabel('Percentage')
     plt.xlim(left=data_by_date['block_date'].min() - pd.Timedelta(days=1), right=data_by_date['block_date'].max() + pd.Timedelta(days=1))
@@ -34,11 +37,11 @@ def plot_data(data_by_date, filepath):
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
     significant_dates = {
-        '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch'),
+        # '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch'),
         '2022-09-15': ('red', '-.', 'The Merge'),
         '2022-11-11': ('deepskyblue', ':', 'FTX Collapse'),
         '2023-03-11': ('fuchsia', '--', 'USDC Depeg'),
-        '2023-04-27': ('orange', '-.', 'MEV Blocker Launch')
+        '2023-04-05': ('orange', '-.', 'OFAs Launch'),
     }
     for date, (color, linestyle, label) in significant_dates.items():
         ax.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
