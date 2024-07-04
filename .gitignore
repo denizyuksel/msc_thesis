@@ -1,3 +1,4 @@
+.DS_Store
 data/*
 db_data/*
 thesis_env/*
@@ -7,6 +8,8 @@ thesis_env_mac/*
 data_fetch_blocknative/*
 data_fetch_flashbots/*
 data_fetch_zeromev/*
+flashbots_2024/*
 protect_historical.csv
+flashbots_2024.csv
 blocknative_zeromev_flashbots_rq4.csv
 final_data_backup.csv

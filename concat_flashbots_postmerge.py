@@ -3,8 +3,17 @@ import pandas as pd
 # Step 1: Read the first CSV file
 df_protect = pd.read_csv('protect_historical.csv')
 
+# Step 2: Read the second CSV file
+df_protect_2024 = pd.read_csv('flashbots_2024.csv')
+
+# Step 3: Merge the two dataframes
+merged_df = pd.concat([df_protect, df_protect_2024], ignore_index=True)
+
+# Step 4: Save the merged dataframe to a new CSV file
+# merged_df.to_csv('merged_protect.csv', index=False)
+
 # Step 2: Count tx_hash per created_at_block_number
-tx_count_per_block = df_protect.groupby('created_at_block_number')['tx_hash'].count().reset_index()
+tx_count_per_block = merged_df.groupby('created_at_block_number')['tx_hash'].count().reset_index()
 
 # Step 3: Add the new column for transaction count
 tx_count_per_block.rename(columns={'tx_hash': 'fb_postmerge_tx_count'}, inplace=True)

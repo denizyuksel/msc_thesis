@@ -12,13 +12,14 @@ def load_and_prepare_data(filepath):
 def aggregate_data(data):
     data_by_date = data.groupby('block_date').agg({
         'private_tx_count' : 'sum',
+        'fb_postmerge_tx_count': 'sum',
     }).reset_index()
     data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14).mean()
+    data_by_date['fb_postmerge_tx_count'] = data_by_date['fb_postmerge_tx_count'].rolling(window=14).mean()
     return data_by_date
 
-def plot_data_double_axis(data, mev_share_data, mev_blocker_data, filepath):
+def plot_data_double_axis(data, mev_blocker_data, filepath):
     # Smoothing data
-    mev_share_data['mev_share_bundle_count'] = mev_share_data['mev_share_bundle_count'].rolling(window=14).mean()
     mev_blocker_data['mined'] = mev_blocker_data['mined'].rolling(window=14).mean()
 
     fig, ax1 = plt.subplots()
@@ -37,7 +38,7 @@ def plot_data_double_axis(data, mev_share_data, mev_blocker_data, filepath):
     ax2 = ax1.twinx()  
     color = 'limegreen'
     ax2.set_ylabel('MEV-Share Bundle Count', color=color)
-    line3, = ax2.plot(mev_share_data['block_date'], mev_share_data['mev_share_bundle_count'], linestyle='-', color=color, label='MEV-Share Bundles')
+    line3, = ax2.plot(data['block_date'], data['fb_postmerge_tx_count'], linestyle='-', color=color, label='Flashbots Bundles')
     ax2.tick_params(axis='y', labelcolor='green')
 
     # Date formatting
@@ -71,40 +72,13 @@ def plot_data_double_axis(data, mev_share_data, mev_blocker_data, filepath):
     plt.setp(ax1.get_xticklabels(), rotation=45)
     plt.savefig(filepath)
 
-def calculate_correlation(data, mevblocker, mevshare):
-    # Ensure that all dataframes are indexed by 'timestamp' if not already set
-    if 'timestamp' in data.columns:
-        data.set_index('timestamp', inplace=True)
-    if 'timestamp' in mevblocker.columns:
-        mevblocker.set_index('timestamp', inplace=True)
-    if 'timestamp' in mevshare.columns:
-        mevshare.set_index('timestamp', inplace=True)
-
-    # Merging the data on the index (timestamp)
-    merged_data = pd.concat([data, mevblocker, mevshare], axis=1, join='outer')
-
-    # Optionally handle missing values by dropping or filling them
-    merged_data.dropna(inplace=True)  # Drops any rows with NaN values, which ensures valid correlation computation
-
-    # Calculate Pearson correlation for 'private_tx_count' and 'mined'
-    pearson_corr = merged_data[['private_tx_count', 'mined']].corr(method='pearson')
-
-    # Calculate Spearman correlation for 'private_tx_count' and 'mev_share_bundle_count'
-    spearman_corr = merged_data[['private_tx_count', 'mev_share_bundle_count']].corr(method='spearman')
-
-    return pearson_corr, spearman_corr
 
 def main():
     data = load_and_prepare_data('../../../final_data.csv')
-    mev_share_data = load_and_prepare_data('../../../mevshare_by_date.csv')
     mev_blocker_data = load_and_prepare_data('../../../mevblocker_deniz_18_distinct.csv')
     data_by_date = aggregate_data(data)
     
-    plot_data_double_axis(data_by_date, mev_share_data, mev_blocker_data, '5.3.1_private_ofa.png')
-    
-    pearson, spearman = calculate_correlation(data, mev_blocker_data, mev_share_data)
-    print("Pearson Correlation Coefficients:\n", pearson)
-    print("Spearman Correlation Coefficients:\n", spearman)
+    plot_data_double_axis(data_by_date, mev_blocker_data, '5.3.1_private_ofa.png')
 
 if __name__ == "__main__":
     main()
