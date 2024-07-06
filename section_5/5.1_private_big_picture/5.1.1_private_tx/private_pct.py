@@ -15,8 +15,8 @@ def aggregate_data(data):
         'private_tx_pct' : 'median',
         'private_gasused_pct' : 'median',
     }).reset_index()
-    data_by_date['private_tx_pct'] = data_by_date['private_tx_pct'].rolling(window=14).mean()
-    data_by_date['private_gasused_pct'] = data_by_date['private_gasused_pct'].rolling(window=14).mean()
+    data_by_date['private_tx_pct'] = data_by_date['private_tx_pct'].rolling(window=14, min_periods=7, center=True).mean()
+    data_by_date['private_gasused_pct'] = data_by_date['private_gasused_pct'].rolling(window=14, min_periods=7, center=True).mean()
     return data_by_date
 
 def plot_data(data_by_date, filepath):

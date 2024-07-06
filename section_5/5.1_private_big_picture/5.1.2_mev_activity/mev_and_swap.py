@@ -21,10 +21,10 @@ def aggregate_data(data):
         'sandwich_extractor_profit': 'sum',
         'liquid_extractor_profit': 'sum',
     }).reset_index()
-    data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14).mean()
-    data_by_date['mev_tx_count'] = data_by_date['mev_tx_count'].rolling(window=14).mean()
-    data_by_date['swap_count'] = data_by_date['swap_count'].rolling(window=14).mean()
-    data_by_date['total_extractor_profit'] = data_by_date['total_extractor_profit'].rolling(window=14).mean()
+    data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14, min_periods=7, center=True).mean()
+    data_by_date['mev_tx_count'] = data_by_date['mev_tx_count'].rolling(window=14, min_periods=7, center=True).mean()
+    data_by_date['swap_count'] = data_by_date['swap_count'].rolling(window=14, min_periods=7, center=True).mean()
+    data_by_date['total_extractor_profit'] = data_by_date['total_extractor_profit'].rolling(window=14, min_periods=7, center=True).mean()
 
     # Summing specific profits to create a new column
     data_by_date['total_extractor_profit_without_swaps'] = (
@@ -32,7 +32,7 @@ def aggregate_data(data):
         data_by_date['sandwich_extractor_profit'] + 
         data_by_date['liquid_extractor_profit']
     )
-    data_by_date['total_extractor_profit_without_swaps'] = data_by_date['total_extractor_profit_without_swaps'].rolling(window=14).mean()
+    data_by_date['total_extractor_profit_without_swaps'] = data_by_date['total_extractor_profit_without_swaps'].rolling(window=14, min_periods=7, center=True).mean()
 
     return data_by_date
 

@@ -16,9 +16,9 @@ def aggregate_data(data):
         'median_timepending' : 'median',
         'private_gasused_pct': 'median',
     }).reset_index()
-    data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14).mean()
-    data_by_date['median_timepending'] = data_by_date['median_timepending'].rolling(window=14).mean()
-    data_by_date['private_gasused_pct'] = data_by_date['private_gasused_pct'].rolling(window=14).mean()
+    data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14, min_periods=7, center=True).mean()
+    data_by_date['median_timepending'] = data_by_date['median_timepending'].rolling(window=14, min_periods=7, center=True).mean()
+    data_by_date['private_gasused_pct'] = data_by_date['private_gasused_pct'].rolling(window=14, min_periods=7, center=True).mean()
 
     return data_by_date
 

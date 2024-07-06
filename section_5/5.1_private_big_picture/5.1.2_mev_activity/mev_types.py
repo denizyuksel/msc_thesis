@@ -19,9 +19,9 @@ def aggregate_data(data):
     'mev_tx_count': 'sum'
     }).reset_index()
     # Apply a 14-day rolling average to the raw counts.
-    aggregated_data["arb_count"] = aggregated_data["arb_count"].rolling(window=14, min_periods=1).mean()
+    aggregated_data["arb_count"] = aggregated_data["arb_count"].rolling(window=14, min_periods=7, center=True).mean()
     # aggregated_data["liquid_count"] = aggregated_data["liquid_count"].rolling(window=3, min_periods=1).median()
-    aggregated_data["sandwich_count"] = aggregated_data["sandwich_count"].rolling(window=14, min_periods=1).mean()
+    aggregated_data["sandwich_count"] = aggregated_data["sandwich_count"].rolling(window=14, min_periods=7, center=True).mean()
 
     return aggregated_data
 

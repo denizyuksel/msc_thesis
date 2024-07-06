@@ -16,9 +16,9 @@ def aggregate_data(data):
         'flashbots_bundle_count' : 'sum',
         # 'flashbots_exclusive_transaction_count': 'sum',
     }).reset_index()
-    data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14).mean()
-    data_by_date['flashbots_bundle_count'] = data_by_date['flashbots_bundle_count'].rolling(window=14).mean()
-    # data_by_date['flashbots_exclusive_transaction_count'] = data_by_date['flashbots_exclusive_transaction_count'].rolling(window=14).mean()
+    data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14, min_periods=7, center=True).mean()
+    data_by_date['flashbots_bundle_count'] = data_by_date['flashbots_bundle_count'].rolling(window=14, min_periods=7, center=True).mean()
+    # data_by_date['flashbots_exclusive_transaction_count'] = data_by_date['flashbots_exclusive_transaction_count'].rolling(window=14, min_periods=7, center=True).mean()
     return data_by_date
 
 def plot_data_double_axis(data, filepath):

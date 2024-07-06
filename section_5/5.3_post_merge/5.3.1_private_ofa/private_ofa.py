@@ -14,14 +14,14 @@ def aggregate_data(data):
         'private_tx_count' : 'sum',
         'fb_postmerge_tx_count': 'sum',
     }).reset_index()
-    data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14).mean()
-    data_by_date['fb_postmerge_tx_count'] = data_by_date['fb_postmerge_tx_count'].rolling(window=14).mean()
+    data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14, min_periods=7, center=True).mean()
+    data_by_date['fb_postmerge_tx_count'] = data_by_date['fb_postmerge_tx_count'].rolling(window=14, min_periods=7, center=True).mean()
     return data_by_date
 
 def plot_data(data, mev_blocker_data, filepath):
     fig, ax1 = plt.subplots()
 
-    mev_blocker_data['mined'] = mev_blocker_data['mined'].rolling(window=14).mean()
+    mev_blocker_data['mined'] = mev_blocker_data['mined'].rolling(window=14, min_periods=7, center=True).mean()
 
     # Plotting only on the primary axis, ax1
     line1, = ax1.plot(data['block_date'], data['private_tx_count'], linestyle='-', color='#003f5c', label='Private Transactions') # deep blue
@@ -62,7 +62,7 @@ def plot_data(data, mev_blocker_data, filepath):
 
 def plot_data_double_axis(data, mev_blocker_data, filepath):
     # Smoothing data
-    mev_blocker_data['mined'] = mev_blocker_data['mined'].rolling(window=14).mean()
+    mev_blocker_data['mined'] = mev_blocker_data['mined'].rolling(window=14, min_periods=7, center=True).mean()
 
     fig, ax1 = plt.subplots()
 

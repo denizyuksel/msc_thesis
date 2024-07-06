@@ -18,8 +18,8 @@ def aggregate_data(data):
         'liquid_extractor_profit': 'sum',
         'fb_postmerge_tx_count' : 'sum',
     }).reset_index()
-    data_by_date['mev_tx_count'] = data_by_date['mev_tx_count'].rolling(window=14).mean()
-    data_by_date['fb_postmerge_tx_count'] = data_by_date['fb_postmerge_tx_count'].rolling(window=14).mean()
+    data_by_date['mev_tx_count'] = data_by_date['mev_tx_count'].rolling(window=14, min_periods=7, center=True).mean()
+    data_by_date['fb_postmerge_tx_count'] = data_by_date['fb_postmerge_tx_count'].rolling(window=14, min_periods=7, center=True).mean()
     
     data_by_date['total_extractor_profit_without_swaps'] = (
         data_by_date['arb_extractor_profit'] + 
@@ -35,7 +35,7 @@ def thousands_formatter(x, pos):
 
 def plot_data_double_axis(data, mev_blocker_data, filepath):
     # Smoothing data
-    mev_blocker_data['mined'] = mev_blocker_data['mined'].rolling(window=14).mean()
+    mev_blocker_data['mined'] = mev_blocker_data['mined'].rolling(window=14, min_periods=7, center=True).mean()
     
     fig, ax1 = plt.subplots()
 
