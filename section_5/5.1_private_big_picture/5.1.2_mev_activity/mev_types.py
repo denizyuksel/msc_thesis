@@ -32,27 +32,27 @@ def plot_data(data, filepath):
     plt.xlim(left=data['block_date'].min(), right=data['block_date'].max())
     # plt.ylim(0)
 
-    plt.plot(data['block_date'], data['arb_count'], color='cyan', label='Arbitrage')
-    plt.plot(data['block_date'], data['sandwich_count'], linestyle='-', color='darkorange', label='Sandwich')
-    plt.plot(data['block_date'], data['liquid_count'], color='green', label='Liquidation')
+    plt.plot(data['block_date'], data['arb_count'], color='#ffc107', label='Arbitrage') # amber
+    plt.plot(data['block_date'], data['sandwich_count'], linestyle='-', color='#00FFFF', label='Sandwich') # cyan
+    plt.plot(data['block_date'], data['liquid_count'], color='#800080', label='Liquidation') # deep purple
 
     ax = plt.gca()
     ax.xaxis.set_major_locator(mdates.MonthLocator(interval=4))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
     significant_dates = {
-        '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch'),
-        '2022-09-15': ('red', '-.', 'The Merge'),
-        '2022-11-11': ('deepskyblue', ':', 'FTX Collapse'),
-        '2023-03-11': ('fuchsia', '--', 'USDC Depeg'),
-        '2023-04-27': ('lime', '-.', 'MEV Blocker Launch')
+        '2021-10-06': ('midnightblue', '--', 'Flashbots Protect Launch'),
+        '2022-09-15': ('goldenrod', '-.', 'The Merge'),
+        '2022-11-11': ('steelblue', ':', 'FTX Collapse'),
+        '2023-03-11': ('sienna', '--', 'USDC Depeg'),
+        '2023-04-05': ('olive', '-.', 'OFAs Launch'),
     }
     for date, (color, linestyle, label) in significant_dates.items():
         ax.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
 
     plt.grid(True)
     plt.xticks(rotation=45)
-    plt.legend(loc='upper left')
+    plt.legend(loc='upper left', ncol=2)
     plt.tight_layout()
     plt.savefig(filepath)
 

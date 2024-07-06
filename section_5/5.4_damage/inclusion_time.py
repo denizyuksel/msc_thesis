@@ -26,15 +26,15 @@ def plot_data(data, filepath):
     fig, ax1 = plt.subplots()
 
     ax2 = ax1.twinx()
-    line1, = ax1.plot(data['block_date'], data['private_gasused_pct'], linestyle='-', color='navy', label='Private O.F. Gas Used')
-    line2, = ax2.plot(data['block_date'], data['median_timepending'], linestyle='-', color='darkorange', label='Median Inclusion Time')
+    line1, = ax1.plot(data['block_date'], data['private_gasused_pct'], linestyle='-', color='#009d57', label='Private O.F. Gas Used') # emerald green
+    line2, = ax2.plot(data['block_date'], data['median_timepending'], linestyle='-', color='#DDA0DD', label='Median Inclusion Time') # plum
 
     ax1.set_xlabel('Date')
-    ax1.set_ylabel('Percentage', color='navy')
-    ax2.set_ylabel('Time pending (miliseconds)', color='darkorange')
+    ax1.set_ylabel('Percentage', color='#009d57')
+    ax2.set_ylabel('Time pending (miliseconds)', color='#DDA0DD')
 
-    ax1.tick_params(axis='y', labelcolor='navy')
-    ax2.tick_params(axis='y', labelcolor='darkorange')
+    ax1.tick_params(axis='y', labelcolor='#009d57')
+    ax2.tick_params(axis='y', labelcolor='#DDA0DD')
 
     plt.title('Private Transactions vs Inclusion Time')
     ax1.set_xlim(left=data['block_date'].min(), right=data['block_date'].max())
@@ -44,29 +44,27 @@ def plot_data(data, filepath):
     ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=4))
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
-    # Setting tick rotation and alignment to center
     plt.setp(ax1.get_xticklabels(), rotation=45, ha="center")
     plt.setp(ax2.get_xticklabels(), rotation=45, ha="center")
 
     significant_dates = {
-        '2021-10-06': ('darkred', '--', 'Flashbots Protect'),
-        '2022-09-15': ('red', '-.', 'The Merge'),
-        '2022-11-11': ('deepskyblue', ':', 'FTX Collapse'),
-        '2023-03-11': ('limegreen', '--', 'USDC Depeg'),
-        '2023-04-27': ('green', '-.', 'OFAs')
+        '2021-08-05': ('darkviolet', '-.', 'EIP-1559 Upgrade'),
+        '2021-10-06': ('midnightblue', '--', 'Flashbots Protect'),
+        '2022-09-15': ('goldenrod', '-.', 'The Merge'),
+        '2022-11-11': ('steelblue', ':', 'FTX Collapse'),
+        '2023-03-11': ('sienna', '--', 'USDC Depeg'),
+        '2023-04-05': ('olive', '-.', 'OFAs'),
     }
-    lines = []
-    labels = []
+    lines = [line1, line2]  # Start with the main lines
+    labels = [line1.get_label(), line2.get_label()]  # Start with the main labels
+
+    # Add vertical lines for significant dates
     for date, (color, linestyle, label) in significant_dates.items():
         line = ax1.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
         lines.append(line)
         labels.append(label)
 
-    # Combine lines and labels for the legend
-    lines += [line1, line2]
-    labels += [line1.get_label(), line2.get_label()]
-
-    leg = plt.legend(lines, labels, loc='lower left')
+    leg = plt.legend(lines, labels, loc='lower left', ncol=2)
     leg.set_zorder(100)  # Ensure legend is on top
 
     plt.grid(True)

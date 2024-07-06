@@ -47,15 +47,15 @@ def plot_data_double_axis(data, filepath):
     # Plotting counts on the left y-axis
     ax1.set_xlabel('Date')
     ax1.set_ylabel('Count')
-    ax1.plot(data['block_date'], data['flashbots_bundle_count'], color='blue', label='Flashbots Bundles')
-    ax1.plot(data['block_date'], data['mev_tx_count'], color='darkorange', label='MEV Transactions')
+    ax1.plot(data['block_date'], data['flashbots_bundle_count'], color='#9dc183', label='Flashbots Bundles') # sage green
+    ax1.plot(data['block_date'], data['mev_tx_count'], color='#f08080', label='MEV Activity') # light coral
     ax1.tick_params(axis='y')
 
     # Setting up the right y-axis for cumulative profit
     ax2 = ax1.twinx()
-    ax2.set_ylabel('Cumulative Profit (USD)', color='green')
-    ax2.plot(data['block_date'], data['cumulative_profit'], linestyle='--', color='limegreen', label='Cumulative Extractor Profit')
-    ax2.tick_params(axis='y', labelcolor='green')
+    ax2.set_ylabel('Cumulative Profit (USD)', color='darkred')
+    ax2.plot(data['block_date'], data['cumulative_profit'], linestyle='--', color='#DC143C', label='Cumulative Extractor Profit') #crimson
+    ax2.tick_params(axis='y', labelcolor='darkred')
 
     ax2.yaxis.set_major_formatter(FuncFormatter(millions_formatter))
 
@@ -71,7 +71,7 @@ def plot_data_double_axis(data, filepath):
     ax2.set_ylim(0)
 
     significant_dates = {
-        '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch'),
+        '2021-10-06': ('midnightblue', '--', 'Flashbots Protect Launch'),
     }
     for date, (color, linestyle, label) in significant_dates.items():
         ax1.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
@@ -86,7 +86,7 @@ def plot_data_double_axis(data, filepath):
             labels.append(label)
     
     # Display a single combined legend
-    leg = plt.legend(handles, labels, loc='lower left', frameon=True)
+    leg = plt.legend(handles, labels, loc='upper left', frameon=True, ncol=2)
     leg.set_zorder(100)  # Ensure legend is on top
 
     plt.grid(True)
@@ -99,7 +99,7 @@ def plot_data(data, filepath):
     ax1.set_xlabel('Date')
     ax1.set_ylabel('Count')
     ax1.plot(data['block_date'], data['flashbots_bundle_count'], color='blue', label='Flashbots Bundles')
-    ax1.plot(data['block_date'], data['mev_tx_count'], color='darkorange', label='MEV Transactions')
+    ax1.plot(data['block_date'], data['mev_tx_count'], color='darkorange', label='MEV Activity')
     
     ax2 = ax1.twinx()  # Instantiate a second axes that shares the same x-axis
     color = 'limegreen'

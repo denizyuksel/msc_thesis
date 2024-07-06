@@ -20,8 +20,8 @@ def aggregate_data(data):
     return data_by_date
 
 def plot_data(data_by_date, filepath):
-    plt.plot(data_by_date['block_date'], data_by_date['private_tx_pct'], linestyle='-', color='blue', label='Transaction Count')
-    plt.plot(data_by_date['block_date'], data_by_date['private_gasused_pct'], linestyle='-', color='green', label='Gas Usage')
+    plt.plot(data_by_date['block_date'], data_by_date['private_tx_pct'], linestyle='-', color='#003f5c', label='Transaction Volume') #deep blue
+    plt.plot(data_by_date['block_date'], data_by_date['private_gasused_pct'], linestyle='-', color='#009d57', label='Gas Usage') #emerald green
 
     # Fill with cyan
     plt.fill_between(data_by_date['block_date'], data_by_date['private_tx_pct'], data_by_date['private_gasused_pct'], color='aqua', alpha=0.2)
@@ -37,18 +37,18 @@ def plot_data(data_by_date, filepath):
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
     significant_dates = {
-        # '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch'),
-        '2022-09-15': ('red', '-.', 'The Merge'),
-        '2022-11-11': ('deepskyblue', ':', 'FTX Collapse'),
-        '2023-03-11': ('fuchsia', '--', 'USDC Depeg'),
-        '2023-04-05': ('orange', '-.', 'OFAs Launch'),
+        '2021-10-06': ('midnightblue', '--', 'Flashbots Protect Launch'),
+        '2022-09-15': ('goldenrod', '-.', 'The Merge'),
+        '2022-11-11': ('steelblue', ':', 'FTX Collapse'),
+        '2023-03-11': ('sienna', '--', 'USDC Depeg'),
+        '2023-04-05': ('olive', '-.', 'OFAs Launch'),
     }
     for date, (color, linestyle, label) in significant_dates.items():
         ax.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
 
     plt.grid(True)
     plt.xticks(rotation=45)
-    plt.legend(loc='upper left')
+    plt.legend(loc='upper left', ncol=2)
     plt.tight_layout()
     plt.savefig(filepath)
 

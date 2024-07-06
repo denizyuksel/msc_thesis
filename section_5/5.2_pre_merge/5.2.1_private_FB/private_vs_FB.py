@@ -24,18 +24,18 @@ def aggregate_data(data):
 def plot_data_double_axis(data, filepath):
     fig, ax1 = plt.subplots()
 
-    color = 'navy'
+    color = '#003f5c' # deep blue
     ax1.set_xlabel('Date')
     ax1.set_ylabel('Percentage', color=color)
     ax1.plot(data['block_date'], data['private_tx_pct'], color=color, label='Private Transactions')
     ax1.tick_params(axis='y', labelcolor=color)
     
     ax2 = ax1.twinx()  # Instantiate a second axes that shares the same x-axis
-    color = 'limegreen'
-    ax2.set_ylabel('Count', color='green')
+    color = '#708090' # slate gray
+    ax2.set_ylabel('Count', color='gray')
     ax2.plot(data['block_date'], data['flashbots_bundle_count'], linestyle='-', color=color, label='Flashbots Bundles')
-    ax2.tick_params(axis='y', labelcolor='green')
-    ax2.tick_params(axis='x', colors=color)
+    ax2.tick_params(axis='y', labelcolor='gray')
+    ax2.tick_params(axis='x', colors='gray')
 
     plt.setp(ax1.get_xticklabels(), rotation=45, ha="center")
     plt.setp(ax2.get_xticklabels(), rotation=45, ha="center")
@@ -49,7 +49,7 @@ def plot_data_double_axis(data, filepath):
     ax2.set_ylim(0)
 
     significant_dates = {
-        '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch'),
+        '2021-10-06': ('midnightblue', '--', 'Flashbots Protect Launch'),
     }
     for date, (color, linestyle, label) in significant_dates.items():
         ax1.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
@@ -77,14 +77,13 @@ def plot_data(data, filepath):
     fig, ax1 = plt.subplots()
 
     # Plotting only on the primary axis, ax1
-    line1, = ax1.plot(data['block_date'], data['private_tx_count'], linestyle='-', color='royalblue', label='Private Transactions')
-    line2, = ax1.plot(data['block_date'], data['flashbots_bundle_count'], linestyle='-', color='orange', label='Flashbots Bundles')
-    # line3, = ax1.plot(data['block_date'], data['flashbots_exclusive_transaction_count'], linestyle='-', color='olive', label='Exclusive Flashbots Transactions')
+    line1, = ax1.plot(data['block_date'], data['private_tx_count'], linestyle='-', color='#003f5c', label='Private Transactions') # deep blue
+    line2, = ax1.plot(data['block_date'], data['flashbots_bundle_count'], linestyle='-', color='#9dc183', label='Flashbots Bundles') # sage green
 
     ax1.set_xlabel('Date')
     ax1.set_ylabel('Count')
 
-    plt.title('Private Transactions vs Flashbots Bundles')
+    plt.title('Private Transactions and Flashbots Bundles Before the Merge')
     ax1.set_xlim(left=data['block_date'].min(),right=data['block_date'].max())
     ax1.set_ylim(0)
 
@@ -95,7 +94,7 @@ def plot_data(data, filepath):
     plt.setp(ax1.get_xticklabels(), rotation=45, ha="center")
 
     significant_dates = {
-        '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch Date (Oct 2021)'),
+        '2021-10-06': ('midnightblue', '--', 'Flashbots Protect Launch'),
     }
     lines = [line1, line2]
     labels = [line1.get_label(), line2.get_label()]

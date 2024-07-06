@@ -48,18 +48,18 @@ def plot_data_double_axis(data, filepath):
     # Plotting counts on the left y-axis
     ax1.set_xlabel('Date')
     ax1.set_ylabel('Count')
-    ax1.plot(data['block_date'], data['private_tx_count'], color='navy', label='Private Transactions')
-    ax1.plot(data['block_date'], data['mev_tx_count'], color='darkorange', label='MEV Transactions')
-    ax1.plot(data['block_date'], data['swap_count'], linestyle='-', color='orchid', label='Swap Count')
+    ax1.plot(data['block_date'], data['private_tx_count'], color='#003f5c', label='Private Transactions') # deep blue
+    ax1.plot(data['block_date'], data['mev_tx_count'], color='#f08080', label='MEV Activity') # light coral
+    ax1.plot(data['block_date'], data['swap_count'], linestyle='-', color='darkcyan', label='Swap Count')
 
     ax1.tick_params(axis='y')
     ax1.set_yscale('log')
 
     # Setting up the right y-axis for cumulative profit
     ax2 = ax1.twinx()
-    ax2.set_ylabel('Profit (USD)', color='green')
-    ax2.plot(data['block_date'], data['cumulative_profit'], linestyle='--', color='limegreen', label='Extractor Profit')
-    ax2.tick_params(axis='y', labelcolor='green')
+    ax2.set_ylabel('Total Profit (USD)', color='#DC143C')
+    ax2.plot(data['block_date'], data['cumulative_profit'], linestyle='--', color='#DC143C', label='Cumulative Extractor Profit') # crimson
+    ax2.tick_params(axis='y', labelcolor='#DC143C')
 
     # Format the y-axis with millions
     def millions_formatter(x, pos):
@@ -78,11 +78,11 @@ def plot_data_double_axis(data, filepath):
     ax2.set_ylim(0)
 
     significant_dates = {
-        '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch'),
-        '2022-09-15': ('red', '-.', 'The Merge'),
-        '2022-11-11': ('deepskyblue', ':', 'FTX Collapse'),
-        '2023-03-11': ('fuchsia', '--', 'USDC Depeg'),
-        '2023-04-05': ('orange', '-.', 'OFAs Launch'),
+        '2021-10-06': ('midnightblue', '--', 'Flashbots Protect Launch'),
+        '2022-09-15': ('goldenrod', '-.', 'The Merge'),
+        '2022-11-11': ('steelblue', ':', 'FTX Collapse'),
+        '2023-03-11': ('sienna', '--', 'USDC Depeg'),
+        '2023-04-05': ('olive', '-.', 'OFAs Launch'),
     }
     for date, (color, linestyle, label) in significant_dates.items():
         ax1.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
@@ -97,7 +97,7 @@ def plot_data_double_axis(data, filepath):
             labels.append(label)
     
     # Display a single combined legend
-    leg = plt.legend(handles, labels, loc='lower left', frameon=True)
+    leg = plt.legend(handles, labels, loc='lower left', frameon=True, ncol = 2)
     leg.set_zorder(100)  # Ensure legend is on top
 
     plt.grid(True)
