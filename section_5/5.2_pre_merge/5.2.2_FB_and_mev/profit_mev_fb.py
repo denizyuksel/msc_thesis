@@ -53,11 +53,11 @@ def plot_data_double_axis(data, filepath):
 
     # Setting up the right y-axis for cumulative profit
     ax2 = ax1.twinx()
-    ax2.set_ylabel('Extractor Profit (USD)', color='darkred')
-    ax2.plot(data['block_date'], data['total_extractor_profit_without_swaps'], linestyle='--', color='#DC143C', label='Extractor Profit') #crimson
+    ax2.set_ylabel('Cumulative Extractor Profit (USD)', color='darkred')
+    ax2.plot(data['block_date'], data['cumulative_profit'], linestyle='--', color='#DC143C', label='Cumulative Extractor Profit') #crimson
     ax2.tick_params(axis='y', labelcolor='darkred')
 
-    # ax2.yaxis.set_major_formatter(FuncFormatter(millions_formatter))
+    ax2.yaxis.set_major_formatter(FuncFormatter(millions_formatter))
 
     plt.setp(ax1.get_xticklabels(), rotation=45, ha="center")
     plt.setp(ax2.get_xticklabels(), rotation=45, ha="center")

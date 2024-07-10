@@ -1,4 +1,5 @@
 .DS_Store
+section_5/.DS_Store
 data/*
 db_data/*
 thesis_env/*
