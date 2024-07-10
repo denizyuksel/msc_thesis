@@ -29,7 +29,7 @@ def aggregate_data(data):
         data_by_date['sandwich_extractor_profit'] + 
         data_by_date['liquid_extractor_profit']
     )
-    # data_by_date['total_extractor_profit_without_swaps'] = data_by_date['total_extractor_profit_without_swaps'].rolling(window=14).mean()
+    data_by_date['total_extractor_profit_without_swaps'] = data_by_date['total_extractor_profit_without_swaps'].rolling(window=14, min_periods=7, center=True).mean()
 
     return data_by_date
 
@@ -53,16 +53,16 @@ def plot_data_double_axis(data, filepath):
 
     # Setting up the right y-axis for cumulative profit
     ax2 = ax1.twinx()
-    ax2.set_ylabel('Cumulative Profit (USD)', color='darkred')
-    ax2.plot(data['block_date'], data['cumulative_profit'], linestyle='--', color='#DC143C', label='Cumulative Extractor Profit') #crimson
+    ax2.set_ylabel('Extractor Profit (USD)', color='darkred')
+    ax2.plot(data['block_date'], data['total_extractor_profit_without_swaps'], linestyle='--', color='#DC143C', label='Extractor Profit') #crimson
     ax2.tick_params(axis='y', labelcolor='darkred')
 
-    ax2.yaxis.set_major_formatter(FuncFormatter(millions_formatter))
+    # ax2.yaxis.set_major_formatter(FuncFormatter(millions_formatter))
 
     plt.setp(ax1.get_xticklabels(), rotation=45, ha="center")
     plt.setp(ax2.get_xticklabels(), rotation=45, ha="center")
 
-    plt.title('MEV Transactions, Flashbots Bundles, and Cumulative Extractor Profit')
+    plt.title('MEV Transactions, Flashbots Bundles, and Extractor Profit')
     ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     ax1.set_xlim(left=data['block_date'].min(), right=data['block_date'].max())

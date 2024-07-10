@@ -26,11 +26,11 @@ def plot_data(data, filepath):
     fig, ax1 = plt.subplots()
 
     ax2 = ax1.twinx()
-    line1, = ax1.plot(data['block_date'], data['private_gasused_pct'], linestyle='-', color='#009d57', label='Private O.F. Gas Used') # emerald green
+    line1, = ax1.plot(data['block_date'], data['private_tx_count'], linestyle='-', color='#003f5c', label='Private Transactions') # deep blue
     line2, = ax2.plot(data['block_date'], data['median_timepending'], linestyle='-', color='#DDA0DD', label='Median Inclusion Time') # plum
 
     ax1.set_xlabel('Date')
-    ax1.set_ylabel('Percentage', color='#009d57')
+    ax1.set_ylabel('Count', color='#009d57')
     ax2.set_ylabel('Time pending (miliseconds)', color='#DDA0DD')
 
     ax1.tick_params(axis='y', labelcolor='#009d57')
@@ -53,7 +53,7 @@ def plot_data(data, filepath):
         '2022-09-15': ('goldenrod', '-.', 'The Merge'),
         '2022-11-11': ('steelblue', ':', 'FTX Collapse'),
         '2023-03-11': ('sienna', '--', 'USDC Depeg'),
-        '2023-04-05': ('olive', '-.', 'OFAs'),
+        '2023-04-27': ('olive', '-.', 'OFAs'),
     }
     lines = [line1, line2]  # Start with the main lines
     labels = [line1.get_label(), line2.get_label()]  # Start with the main labels

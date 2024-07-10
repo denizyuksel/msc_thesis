@@ -25,7 +25,7 @@ def plot_data(data, mev_blocker_data, filepath):
 
     # Plotting only on the primary axis, ax1
     line1, = ax1.plot(data['block_date'], data['private_tx_count'], linestyle='-', color='#003f5c', label='Private Transactions') # deep blue
-    line2, = ax1.plot(data['block_date'], data['fb_postmerge_tx_count'], linestyle='-', color='#9dc183', label='Flashbots Transactions') # sage green
+    line2, = ax1.plot(data['block_date'], data['fb_postmerge_tx_count'], linestyle='-', color='#9dc183', label='Flashbots Protect Transactions') # sage green
     line3, = ax1.plot(mev_blocker_data['block_date'], mev_blocker_data['mined'], color='#c2185b', label='MEV Blocker Transactions') # magenta
 
     ax1.set_xlabel('Date')

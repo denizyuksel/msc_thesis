@@ -26,6 +26,7 @@ def aggregate_data(data):
         data_by_date['sandwich_extractor_profit'] + 
         data_by_date['liquid_extractor_profit']
     )
+    data_by_date['total_extractor_profit_without_swaps'] = data_by_date['total_extractor_profit_without_swaps'].rolling(window=14, min_periods=7, center=True).mean()
 
     return data_by_date
 
@@ -44,7 +45,7 @@ def plot_data_double_axis(data, mev_blocker_data, filepath):
     # First axis plots
     ax1.set_xlabel('Date')
     ax1.set_ylabel('Count')
-    line1, = ax1.plot(data['block_date'], data['fb_postmerge_tx_count'], color="#9dc183", label='Flashbots Transactions') # sage green
+    line1, = ax1.plot(data['block_date'], data['fb_postmerge_tx_count'], color="#9dc183", label='Flashbots Protect Transactions') # sage green
     line2, = ax1.plot(mev_blocker_data['block_date'], mev_blocker_data['mined'], color="#c2185b", label='MEV Blocker Transactions') # magenta
     line3, = ax1.plot(data['block_date'], data['mev_tx_count'], color="#f08080", label='MEV Activity') # light coral
 
@@ -52,8 +53,8 @@ def plot_data_double_axis(data, mev_blocker_data, filepath):
 
     # Setting up the right y-axis for cumulative profit
     ax2 = ax1.twinx()
-    ax2.set_ylabel('Cumulative Profit (USD)', color='darkred')
-    ax2.plot(data['block_date'], data['cumulative_profit'], linestyle='--', color='#DC143C', label='Extractor Profit')
+    ax2.set_ylabel('Extractor Profit (USD)', color='darkred')
+    ax2.plot(data['block_date'], data['total_extractor_profit_without_swaps'], linestyle='--', color='#DC143C', label='Extractor Profit')
     ax2.tick_params(axis='y', labelcolor='darkred')
 
     ax2.yaxis.set_major_formatter(FuncFormatter(thousands_formatter))
