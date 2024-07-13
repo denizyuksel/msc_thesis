@@ -70,11 +70,11 @@ def plot_data_double_axis(data, mev_blocker_data, filepath):
     # ax1.set_ylim(0)
     ax2.set_ylim(0)
 
-    significant_dates = {
-        '2023-04-01': ('#228B22', '-.', 'MEV-Share Launch'), # forest green
-        '2023-04-05': ('#cc5500', '-.', 'MEV Blocker Launch'), # burnt orange
+    significant_dates = {  
         '2022-11-11': ('steelblue', ':', 'FTX Collapse'),
         '2023-03-11': ('sienna', '--', 'USDC Depeg'),
+        '2023-04-01': ('rebeccapurple', '-.', 'MEV-Share Launch'),
+        '2023-04-27': ('#770737', '-.', 'MEV-Blocker Launch'), #mulberry
     }
     for date, (color, linestyle, label) in significant_dates.items():
         ax1.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
@@ -89,7 +89,7 @@ def plot_data_double_axis(data, mev_blocker_data, filepath):
             labels.append(label)
     
     # Display a single combined legend
-    leg = plt.legend(handles, labels, loc='upper left', fontsize="medium", ncol=1)
+    leg = plt.legend(handles, labels, loc='upper left', fontsize="medium", ncol=2)
     leg.set_zorder(100)  # Ensure legend is on top
 
     plt.grid(True)

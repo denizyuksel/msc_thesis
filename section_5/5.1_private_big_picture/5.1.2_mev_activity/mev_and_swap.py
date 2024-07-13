@@ -82,7 +82,7 @@ def plot_data_double_axis(data, filepath):
         '2022-09-15': ('goldenrod', '-.', 'The Merge'),
         '2022-11-11': ('steelblue', ':', 'FTX Collapse'),
         '2023-03-11': ('sienna', '--', 'USDC Depeg'),
-        '2023-04-27': ('olive', '-.', 'MEV-Blocker Launch'),
+        '2023-04-27': ('#770737', '-.', 'MEV-Blocker Launch'), #mulberry
     }
     for date, (color, linestyle, label) in significant_dates.items():
         ax1.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)

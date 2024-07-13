@@ -52,7 +52,7 @@ def plot_data(data, filepath):
         '2022-09-15': ('goldenrod', '-.', 'The Merge'),
         '2022-11-11': ('steelblue', ':', 'FTX Collapse'),
         '2023-03-11': ('sienna', '--', 'USDC Depeg'),
-        '2023-04-27': ('olive', '-.', 'OFAs'),
+        '2023-04-27': ('#770737', '-.', 'MEV-Blocker Launch'), #mulberry
     }
     lines = [line1, line2]  # Add main lines first
     labels = [line1.get_label(), line2.get_label()]  # Add main labels first
