@@ -73,6 +73,8 @@ def plot_data_double_axis(data, mev_blocker_data, filepath):
     significant_dates = {
         '2023-04-01': ('#228B22', '-.', 'MEV-Share Launch'), # forest green
         '2023-04-05': ('#cc5500', '-.', 'MEV Blocker Launch'), # burnt orange
+        '2022-11-11': ('steelblue', ':', 'FTX Collapse'),
+        '2023-03-11': ('sienna', '--', 'USDC Depeg'),
     }
     for date, (color, linestyle, label) in significant_dates.items():
         ax1.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)

@@ -62,7 +62,7 @@ def plot_data_double_axis(data, filepath):
     plt.setp(ax1.get_xticklabels(), rotation=45, ha="center")
     plt.setp(ax2.get_xticklabels(), rotation=45, ha="center")
 
-    plt.title('MEV Transactions, Flashbots Bundles, and Extractor Profit')
+    plt.title('Pre-Merge MEV Transactions, Flashbots Bundles, and Extractor Profit')
     ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     ax1.set_xlim(left=data['block_date'].min(), right=data['block_date'].max())

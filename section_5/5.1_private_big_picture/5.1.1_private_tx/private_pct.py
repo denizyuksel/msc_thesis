@@ -7,7 +7,7 @@ def load_and_prepare_data(filepath):
     data = pd.read_csv(filepath)
     data['block_date'] = pd.to_datetime(data['block_date'])
     filtered_data = data[(data['block_date'] >= pd.Timestamp('2021-05-31')) & 
-                         (data['block_date'] <= pd.Timestamp('2024-04-01'))]
+                        (data['block_date'] <= pd.Timestamp('2024-04-01'))]
     return filtered_data
 
 def aggregate_data(data):

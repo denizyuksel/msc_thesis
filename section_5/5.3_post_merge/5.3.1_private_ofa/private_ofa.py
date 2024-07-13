@@ -44,6 +44,8 @@ def plot_data(data, mev_blocker_data, filepath):
     significant_dates = {
         '2023-04-01': ('#228B22', '-.', 'MEV-Share Launch'), # forest green
         '2023-04-05': ('#cc5500', '-.', 'MEV Blocker Launch'), # burnt orange
+        '2022-11-11': ('steelblue', ':', 'FTX Collapse'),
+        '2023-03-11': ('sienna', '--', 'USDC Depeg'),
     }
     lines = [line1, line2, line3]
     labels = [line1.get_label(), line2.get_label(), line3.get_label()]
@@ -53,7 +55,7 @@ def plot_data(data, mev_blocker_data, filepath):
         labels.append(label)
 
     # Combine lines and labels for the legend
-    leg = plt.legend(lines, labels, loc='upper left', frameon=True, ncol=1)
+    leg = plt.legend(lines, labels, loc='upper left', frameon=True, ncol=2)
     leg.set_zorder(100)  # Ensure legend is on top
 
     plt.grid(True)
