@@ -26,17 +26,17 @@ def plot_data(data, filepath):
     fig, ax1 = plt.subplots()
 
     ax2 = ax1.twinx()
-    line1, = ax1.plot(data['block_date'], data['private_tx_count'], linestyle='-', color='#003f5c', label='Private Transactions') # deep blue
-    line2, = ax2.plot(data['block_date'], data['median_timepending'], linestyle='-', color='#DDA0DD', label='Median Inclusion Time') # plum
+    line1, = ax1.plot(data['block_date'], data['private_tx_count'], linestyle='-', color='#003f5c', label='Private Transaction Volume') # deep blue
+    line2, = ax2.plot(data['block_date'], data['median_timepending'], linestyle='-', color='#DDA0DD', label='Inclusion Time') # plum
 
     ax1.set_xlabel('Date')
-    ax1.set_ylabel('Count', color='#009d57')
+    ax1.set_ylabel('Count', color='black')
     ax2.set_ylabel('Time pending (miliseconds)', color='#DDA0DD')
 
-    ax1.tick_params(axis='y', labelcolor='#009d57')
+    ax1.tick_params(axis='y', labelcolor='black')
     ax2.tick_params(axis='y', labelcolor='#DDA0DD')
 
-    plt.title('Private Transactions vs Inclusion Time')
+    plt.title('Private Transaction Volume vs Inclusion Time')
     ax1.set_xlim(left=data['block_date'].min(), right=data['block_date'].max())
     ax1.set_ylim(0)
     ax2.set_ylim(0)

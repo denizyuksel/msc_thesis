@@ -13,8 +13,10 @@ def aggregate_data(data):
     data_by_date = data.groupby('block_date').agg({
         'private_tx_count' : 'sum',
         'fb_postmerge_tx_count': 'sum',
+        'public_tx_count' : 'sum',
     }).reset_index()
     data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14, min_periods=7, center=True).mean()
+    data_by_date['public_tx_count'] = data_by_date['public_tx_count'].rolling(window=14, min_periods=7, center=True).mean()
     data_by_date['fb_postmerge_tx_count'] = data_by_date['fb_postmerge_tx_count'].rolling(window=14, min_periods=7, center=True).mean()
     return data_by_date
 
