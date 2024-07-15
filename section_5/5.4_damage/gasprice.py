@@ -15,10 +15,12 @@ def aggregate_data(data):
         'private_tx_count' : 'sum',
         'median_gasprice_gwei' : 'median',
         'private_gasused_pct' : 'median',
+        'mean_gasprice_gwei' : 'mean',
     }).reset_index()
     data_by_date['private_tx_count'] = data_by_date['private_tx_count'].rolling(window=14, min_periods=7, center=True).mean()
     data_by_date['private_gasused_pct'] = data_by_date['private_gasused_pct'].rolling(window=14, min_periods=7, center=True).mean()
     data_by_date['median_gasprice_gwei'] = data_by_date['median_gasprice_gwei'].rolling(window=14, min_periods=7, center=True).mean()
+    data_by_date['mean_gasprice_gwei'] = data_by_date['mean_gasprice_gwei'].rolling(window=14, min_periods=7, center=True).mean()
     return data_by_date
 
 def plot_data(data, filepath):

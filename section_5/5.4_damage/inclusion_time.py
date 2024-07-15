@@ -73,8 +73,8 @@ def plot_data(data, filepath):
 
 def find_highest_correlation(data):
     start_date = pd.Timestamp('2021-10-06')
-    end_date = pd.Timestamp('2022-09-01')
-    current_date = pd.Timestamp('2022-05-01')
+    end_date = pd.Timestamp('2022-09-15')
+    current_date = pd.Timestamp('2022-07-01')
 
     pearson_results = []
     spearman_results = []
@@ -83,8 +83,8 @@ def find_highest_correlation(data):
         # Filter data for the current date range
         filtered_data = data[(data['block_date'] >= start_date) & (data['block_date'] <= current_date)]
         if not filtered_data.dropna().empty:
-            pearson_corr, _ = pearsonr(filtered_data.dropna()['private_tx_count'], filtered_data.dropna()['fb_bundle_count'])
-            spearman_corr, _ = spearmanr(filtered_data.dropna()['private_tx_count'], filtered_data.dropna()['fb_bundle_count'])
+            pearson_corr, _ = pearsonr(filtered_data.dropna()['private_tx_count'], filtered_data.dropna()['median_timepending'])
+            spearman_corr, _ = spearmanr(filtered_data.dropna()['private_tx_count'], filtered_data.dropna()['median_timepending'])
 
             # Store the results with their corresponding date
             pearson_results.append((pearson_corr, current_date.strftime('%Y-%m-%d')))
@@ -100,26 +100,60 @@ def find_highest_correlation(data):
 
 def calculate_correlation(data):
     # Calculate Pearson and Spearman correlation coefficients on the data
-    portion_data = data[(data['block_date'] >= pd.Timestamp('2021-10-06')) & (data['block_date'] <= pd.Timestamp('2022-05-03'))]
-    pearson_corr, pearson_p_value = pearsonr(portion_data.dropna()['private_tx_count'], portion_data.dropna()['fb_bundle_count'])
-    spearman_corr, spearman_p_value = spearmanr(portion_data.dropna()['private_tx_count'], portion_data.dropna()['fb_bundle_count'])
+    portion_data = data[(data['block_date'] >= pd.Timestamp('2021-10-06')) & (data['block_date'] <= pd.Timestamp('2022-07-01'))]
+    pearson_corr, pearson_p_value = pearsonr(portion_data.dropna()['private_tx_count'], portion_data.dropna()['median_timepending'])
+    spearman_corr, spearman_p_value = spearmanr(portion_data.dropna()['private_tx_count'], portion_data.dropna()['median_timepending'])
     return pearson_corr, pearson_p_value, spearman_corr, spearman_p_value
+
+import pandas as pd
+
+def find_highest_median_timepending(data, start_date, end_date):
+    # Convert input strings to Timestamps
+    start_date = pd.Timestamp(start_date)
+    end_date = pd.Timestamp(end_date)
+
+    # Check if the DataFrame is not empty and has the required columns
+    if data.empty:
+        print("The DataFrame is empty.")
+        return pd.DataFrame()
+    if 'block_date' not in data.columns or 'median_timepending' not in data.columns:
+        print("Required columns are missing.")
+        return pd.DataFrame()
+
+    # Filter data for the specified date range
+    filtered_data = data[(data['block_date'] >= start_date) & (data['block_date'] <= end_date)]
+
+    # Check if the filtered data is empty after applying the date range filter
+    if filtered_data.empty:
+        print("No data available within the specified date range.")
+        return pd.DataFrame()
+
+    # Drop rows with NaN values and sort by 'median_timepending' in descending order
+    sorted_data = filtered_data.dropna().sort_values(by='median_timepending', ascending=False)
+
+    # Get the top 10 records
+    top_10_median_timepending = sorted_data.head(50)
+
+    return top_10_median_timepending
 
 def main():
     data = load_and_prepare_data('../../final_data.csv')
     data_by_date = aggregate_data(data)
     plot_data(data_by_date, '5.4_inclusion_time.png')
-    # pearson, pearson_p, spearman, spearman_p = calculate_correlation(data_by_date)
-    # print(f"Pearson correlation: {pearson}, p value: {pearson_p}")
-    # print(f"Spearman correlation: {spearman}, p value: {spearman_p}")
+    pearson, pearson_p, spearman, spearman_p = calculate_correlation(data_by_date)
+    print(f"Pearson correlation: {pearson}, p value: {pearson_p}")
+    print(f"Spearman correlation: {spearman}, p value: {spearman_p}")
 
-    # top_pearson, top_spearman = find_highest_correlation(data_by_date)
-    # print("Top 10 Pearson correlations and dates:")
-    # for corr, date in top_pearson:
-    #     print(f"{date}: {corr:.4f}")
-    # print("\nTop 10 Spearman correlations and dates:")
-    # for corr, date in top_spearman:
-    #     print(f"{date}: {corr:.4f}")
+    top_pearson, top_spearman = find_highest_correlation(data_by_date)
+    print("Top 10 Pearson correlations and dates:")
+    for corr, date in top_pearson:
+        print(f"{date}: {corr:.4f}")
+    print("\nTop 10 Spearman correlations and dates:")
+    for corr, date in top_spearman:
+        print(f"{date}: {corr:.4f}")
+        
+    # top_timependings = find_highest_median_timepending(data_by_date, '2021-10-06', '2022-09-01')
+    # print(f"Highest timepending dates: {top_timependings}")
 
 if __name__ == "__main__":
     main()
