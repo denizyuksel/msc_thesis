@@ -63,8 +63,8 @@ def plot_data(data, filepath):
     plt.savefig(filepath)
 
 def find_highest_correlation(data):
-    # start_date = pd.Timestamp('2021-10-06')
-    start_date = pd.Timestamp('2021-11-01')
+    start_date = pd.Timestamp('2021-10-06')
+    # start_date = pd.Timestamp('2021-11-01')
     end_date = pd.Timestamp('2022-07-01')
     current_date = pd.Timestamp('2022-01-01')
 
@@ -92,7 +92,8 @@ def find_highest_correlation(data):
 
 def calculate_correlation(data):
     # Calculate Pearson and Spearman correlation coefficients on the data
-    portion_data = data[(data['block_date'] >= pd.Timestamp('2021-10-06')) & (data['block_date'] <= pd.Timestamp('2022-05-03'))]
+    # portion_data = data[(data['block_date'] >= pd.Timestamp('2021-10-06')) & (data['block_date'] <= pd.Timestamp('2022-05-03'))]
+    portion_data = data[((data['block_date'] < pd.Timestamp('2021-10-06')) & (data['block_date'] >= pd.Timestamp('2021-03-01')))]
     pearson_corr, pearson_p_value = pearsonr(portion_data.dropna()['private_tx_count'], portion_data.dropna()['flashbots_bundle_count'])
     spearman_corr, spearman_p_value = spearmanr(portion_data.dropna()['private_tx_count'], portion_data.dropna()['flashbots_bundle_count'])
     return pearson_corr, pearson_p_value, spearman_corr, spearman_p_value

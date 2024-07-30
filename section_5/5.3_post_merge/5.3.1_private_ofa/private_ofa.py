@@ -28,7 +28,7 @@ def plot_data(data, mev_blocker_data, filepath):
     # Plotting only on the primary axis, ax1
     line1, = ax1.plot(data['block_date'], data['private_tx_count'], linestyle='-', color='#003f5c', label='Private Transactions') # deep blue
     line2, = ax1.plot(data['block_date'], data['fb_postmerge_tx_count'], linestyle='-', color='#9dc183', label='Flashbots Protect Transactions') # sage green
-    line3, = ax1.plot(mev_blocker_data['block_date'], mev_blocker_data['mined'], color='#c2185b', label='MEV Blocker Transactions') # magenta
+    line3, = ax1.plot(mev_blocker_data['block_date'], mev_blocker_data['mined'], color='#c2185b', label='MEVBlocker Transactions') # magenta
 
     ax1.set_xlabel('Date')
     ax1.set_ylabel('Count')
@@ -47,7 +47,7 @@ def plot_data(data, mev_blocker_data, filepath):
         '2022-11-11': ('steelblue', ':', 'FTX Collapse'),
         '2023-03-11': ('sienna', '--', 'USDC Depeg'),
         '2023-04-01': ('rebeccapurple', '-.', 'MEV-Share Launch'),
-        '2023-04-27': ('#770737', '-.', 'MEV-Blocker Launch'), #mulberry
+        '2023-04-27': ('#770737', '-.', 'MEVBlocker Launch'), #mulberry
     }
     lines = [line1, line2, line3]
     labels = [line1.get_label(), line2.get_label(), line3.get_label()]

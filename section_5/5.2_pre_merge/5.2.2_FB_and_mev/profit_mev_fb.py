@@ -145,7 +145,7 @@ def find_highest_correlation(data):
     # start_date = pd.Timestamp('2021-10-06')
     start_date = pd.Timestamp('2021-10-06')
     end_date = pd.Timestamp('2022-07-01')
-    current_date = pd.Timestamp('2022-03-01')
+    current_date = pd.Timestamp('2022-06-15')
 
     pearson_results = []
     spearman_results = []
@@ -171,8 +171,9 @@ def find_highest_correlation(data):
 
 def calculate_correlation(data):
     # Calculate Pearson and Spearman correlation coefficients on the raw data
-    pearson_corr, pearson_p_value = pearsonr(data.dropna()['flashbots_bundle_count'], data.dropna()['mev_tx_count'])
-    spearman_corr, spearman_p_value = spearmanr(data.dropna()['flashbots_bundle_count'], data.dropna()['mev_tx_count'])
+    portion_data = data[((data['block_date'] >= pd.Timestamp('2021-10-06')) & (data['block_date'] < pd.Timestamp('2022-06-15')))]
+    pearson_corr, pearson_p_value = pearsonr(portion_data.dropna()['flashbots_bundle_count'], portion_data.dropna()['mev_tx_count'])
+    spearman_corr, spearman_p_value = spearmanr(portion_data.dropna()['flashbots_bundle_count'], portion_data.dropna()['mev_tx_count'])
     return pearson_corr, pearson_p_value, spearman_corr, spearman_p_value
 
 def main():

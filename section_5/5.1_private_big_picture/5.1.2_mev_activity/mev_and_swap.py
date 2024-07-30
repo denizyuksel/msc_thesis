@@ -80,9 +80,9 @@ def plot_data_double_axis(data, filepath):
     significant_dates = {
         '2021-10-06': ('midnightblue', '--', 'Flashbots Protect Launch'),
         '2022-09-15': ('goldenrod', '-.', 'The Merge'),
-        '2022-11-11': ('steelblue', ':', 'FTX Collapse'),
+        '2022-11-11': ('steelblue', ':', 'FTX Bankruptcy'),
         '2023-03-11': ('sienna', '--', 'USDC Depeg'),
-        '2023-04-27': ('#770737', '-.', 'MEV-Blocker Launch'), #mulberry
+        '2023-04-27': ('#770737', '-.', 'MEVBlocker Launch'), #mulberry
     }
     for date, (color, linestyle, label) in significant_dates.items():
         ax1.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
@@ -123,9 +123,9 @@ def plot_data(data_by_date, filepath):
     significant_dates = {
         '2021-10-06': ('darkred', '--', 'Flashbots Protect Launch'),
         '2022-09-15': ('red', '-.', 'The Merge'),
-        '2022-11-11': ('deepskyblue', ':', 'FTX Collapse'),
+        '2022-11-11': ('deepskyblue', ':', 'FTX Bankruptcy'),
         '2023-03-11': ('fuchsia', '--', 'USDC Depeg'),
-        '2023-04-27': ('lime', '-.', 'MEV Blocker Launch')
+        '2023-04-27': ('lime', '-.', 'MEVBlocker Launch')
     }
     for date, (color, linestyle, label) in significant_dates.items():
         ax.axvline(pd.Timestamp(date), color=color, linestyle=linestyle, linewidth=2, label=label)
@@ -140,8 +140,8 @@ def calculate_correlation(data):
     # Calculate Pearson and Spearman correlation coefficients on the raw data
     data_portion = data[(data['block_date'] >= pd.Timestamp('2021-10-06')) & (data['block_date'] <= pd.Timestamp('2023-04-27'))]
     # data_portion = data[data['block_date'] >= pd.Timestamp('2023-04-27')]
-    pearson_corr, pearson_p_value = pearsonr(data_portion.dropna()['private_tx_count'], data_portion.dropna()['mev_tx_count'])
-    spearman_corr, spearman_p_value = spearmanr(data_portion.dropna()['private_tx_count'], data_portion.dropna()['mev_tx_count'])
+    pearson_corr, pearson_p_value = pearsonr(data_portion.dropna()['private_tx_count'], data_portion.dropna()['swap_count'])
+    spearman_corr, spearman_p_value = spearmanr(data_portion.dropna()['private_tx_count'], data_portion.dropna()['swap_count'])
     return pearson_corr, pearson_p_value, spearman_corr, spearman_p_value
 
 def main():
