@@ -64,12 +64,42 @@ def plot_data(data, mev_blocker_data, filepath):
     plt.tight_layout()
     plt.savefig(filepath)
 
+def calculate_correlation_private_MEVBlocker(data, mev_blocker):
+    # data_filtered = data[(data['block_date'] >= pd.Timestamp('2023-05-01')) & (data['block_date'] <= pd.Timestamp('2024-03-23'))]
+    # mev_blocker_filtered = mev_blocker[(mev_blocker['block_date'] >= pd.Timestamp('2023-07-01')) & (mev_blocker['block_date'] <= pd.Timestamp('2024-03-23'))]
+
+    merged_data = pd.merge(data, mev_blocker, on='block_date')
+
+    merged_data['mined'] = merged_data['mined'].rolling(window=14, min_periods=7, center=True).mean()
+
+    pearson_corr, pearson_p_value = pearsonr(merged_data.dropna()['private_tx_count'], merged_data.dropna()['mined'])
+    spearman_corr, spearman_p_value = spearmanr(merged_data.dropna()['private_tx_count'], merged_data.dropna()['mined'])
+    return pearson_corr, pearson_p_value, spearman_corr, spearman_p_value
+
+def calculate_correlation_FB_MEVBlocker(data, mev_blocker):
+    merged_data = pd.merge(data, mev_blocker, on='block_date')
+    merged_data = merged_data[(merged_data['block_date'] >= pd.Timestamp('2023-07-01')) & (merged_data['block_date'] <= pd.Timestamp('2024-03-23'))]
+
+    merged_data['mined'] = merged_data['mined'].rolling(window=14, min_periods=7, center=True).mean()
+
+    pearson_corr, pearson_p_value = pearsonr(merged_data.dropna()['fb_postmerge_tx_count'], merged_data.dropna()['mined'])
+    spearman_corr, spearman_p_value = spearmanr(merged_data.dropna()['fb_postmerge_tx_count'], merged_data.dropna()['mined'])
+    return pearson_corr, pearson_p_value, spearman_corr, spearman_p_value
+
 def main():
     data = load_and_prepare_data('../../../final_data.csv')
     mev_blocker_data = load_and_prepare_data('../../../mevblocker_deniz_18_distinct.csv')
     data_by_date = aggregate_data(data)
+
+    pearson, pearson_p, spearman, spearman_p = calculate_correlation_private_MEVBlocker(data_by_date, mev_blocker_data)
+    print(f"Private and MEVBlocker Pearson correlation and p value: {pearson}, {pearson_p}")
+    print(f"Private and MEVBlocker Spearman correlation and p value: {spearman}, {spearman_p}")
+
+    pearson, pearson_p, spearman, spearman_p = calculate_correlation_FB_MEVBlocker(data_by_date, mev_blocker_data)
+    print(f"Flashbots Protect and MEVBlocker Pearson correlation and p value: {pearson}, {pearson_p}")
+    print(f"Flashbots Protect and MEVBlocker Spearman correlation and p value: {spearman}, {spearman_p}")
     
-    # plot_data_double_axis(data_by_date, mev_blocker_data, '5.3.1_private_ofa.png')
+    
     plot_data(data_by_date, mev_blocker_data, '5.3.1_private_ofa.png')
 
 if __name__ == "__main__":
