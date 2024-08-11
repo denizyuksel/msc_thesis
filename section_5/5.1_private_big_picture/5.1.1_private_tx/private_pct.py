@@ -6,8 +6,7 @@ from scipy.stats import pearsonr, spearmanr
 def load_and_prepare_data(filepath):
     data = pd.read_csv(filepath)
     data['block_date'] = pd.to_datetime(data['block_date'])
-    filtered_data = data[(data['block_date'] >= pd.Timestamp('2021-05-31')) & 
-                        (data['block_date'] <= pd.Timestamp('2024-04-01'))]
+    filtered_data = data[(data['block_date'] >= pd.Timestamp('2021-05-31')) & (data['block_date'] <= pd.Timestamp('2024-04-23'))]
     return filtered_data
 
 def aggregate_data(data):
@@ -29,12 +28,14 @@ def plot_data(data_by_date, filepath):
     plt.title('Evolution of Private Transaction Flow Over Time')
     plt.xlabel('Date')
     plt.ylabel('Percentage')
-    plt.xlim(left=data_by_date['block_date'].min() - pd.Timedelta(days=1), right=data_by_date['block_date'].max() + pd.Timedelta(days=1))
+    # plt.xlim(left=data_by_date['block_date'].min(), right=data_by_date['block_date'].max())
     plt.ylim(0)
 
     ax = plt.gca()
-    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=4))
+    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=3))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    ax.set_xlim(left=data_by_date['block_date'].min(), right=data_by_date['block_date'].max())
+
 
     significant_dates = {
         '2021-10-06': ('midnightblue', '--', 'Flashbots Protect Launch'),
